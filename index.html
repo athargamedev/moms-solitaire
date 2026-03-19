@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mom's Solitaire ♥</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body class="theme-classic">
+
+<!-- ══════════════════════════════════════════════════════ HEADER ═══ -->
+<header class="header">
+    <div class="header-left">
+        <button class="btn btn-ghost btn-icon" id="soundToggle" title="Toggle Sound">🔊</button>
+        <button class="btn btn-primary" id="customizeBtn">✨ Customize</button>
+    </div>
+
+    <div class="header-center">
+        <h1 class="header-title">Mom's <span>Solitaire</span></h1>
+        <p class="header-subtitle">Klondike · Classic Edition</p>
+    </div>
+
+    <div class="header-right">
+        <button class="btn btn-ghost btn-icon" id="undoBtn"    title="Undo (Ctrl+Z)">↩️</button>
+        <button class="btn btn-ghost btn-icon" id="hintBtn"    title="Hint (H)">💡</button>
+        <button class="btn btn-ghost btn-icon" id="nextMoveBtn" title="Play one move for me">🤖</button>
+        <button class="btn btn-ghost btn-icon" id="newGameBtn" title="New Game">🔄</button>
+    </div>
+</header>
+
+<!-- ═════════════════════════════════════════════════════ GAME AREA ═══ -->
+<main class="game-container">
+
+    <!-- Top row: Stock / Waste ←→ Foundations -->
+    <div class="top-row">
+        <div class="stock-waste">
+            <div class="pile stock-pile" id="stock">
+                <span class="pile-placeholder" title="Click to draw">↻</span>
+            </div>
+            <div class="pile" id="waste"></div>
+        </div>
+
+        <div class="foundations">
+            <div class="pile foundation" id="foundation-0" data-suit="spades">
+                <span class="pile-placeholder">♠</span>
+            </div>
+            <div class="pile foundation" id="foundation-1" data-suit="hearts">
+                <span class="pile-placeholder">♥</span>
+            </div>
+            <div class="pile foundation" id="foundation-2" data-suit="diamonds">
+                <span class="pile-placeholder">♦</span>
+            </div>
+            <div class="pile foundation" id="foundation-3" data-suit="clubs">
+                <span class="pile-placeholder">♣</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau: 7 columns -->
+    <div class="tableau" id="tableau">
+        <div class="tableau-pile" id="tableau-0"></div>
+        <div class="tableau-pile" id="tableau-1"></div>
+        <div class="tableau-pile" id="tableau-2"></div>
+        <div class="tableau-pile" id="tableau-3"></div>
+        <div class="tableau-pile" id="tableau-4"></div>
+        <div class="tableau-pile" id="tableau-5"></div>
+        <div class="tableau-pile" id="tableau-6"></div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="progress-wrap">
+        <div class="progress-row">
+            <div class="progress-track">
+                <div id="progress-fill"></div>
+            </div>
+            <span id="progress-label">Get those Aces!</span>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div class="status-item">
+            <span class="status-icon">👆</span>
+            <span class="status-label">Moves</span>
+            <span class="status-value" id="moveCount">0</span>
+        </div>
+        <div class="status-item">
+            <span class="status-icon">⏱</span>
+            <span class="status-label">Time</span>
+            <span class="status-value" id="timeDisplay">00:00</span>
+        </div>
+        <div class="status-item">
+            <span class="status-icon">⭐</span>
+            <span class="status-label">Score</span>
+            <span class="status-value" id="scoreDisplay">350</span>
+        </div>
+        <!-- Auto-complete button (hidden until solvable) -->
+        <button class="btn btn-primary" id="autoCompleteBtn" style="display:none;" title="Finish automatically!">
+            🪄 Auto-Complete!
+        </button>
+    </div>
+</main>
+
+<!-- ═══════════════════════════════════════════ CUSTOMIZE MODAL ═══ -->
+<div class="modal-overlay" id="customizeModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title"><span class="modal-title-icon">✨</span> Customize Your Game</h2>
+            <button class="modal-close" id="closeCustomize" title="Close">×</button>
+        </div>
+        <div class="modal-content">
+
+            <!-- Card Photo -->
+            <div class="settings-section">
+                <h3 class="section-title">🃏 Card Back Photo</h3>
+                <div class="upload-area" id="photoUploadArea">
+                    <div class="upload-icon">📷</div>
+                    <div class="upload-text">Click or drag &amp; drop a family photo</div>
+                    <div class="upload-hint">JPG / PNG · max 6 MB</div>
+                </div>
+                <input class="file-input-hidden" type="file" id="photoInput" accept="image/*">
+                <div id="photo-preview-area" class="photo-previews"></div>
+                <div class="text-input-group">
+                    <label class="text-input-label" for="cz-message">✍️ Personal message on cards</label>
+                    <input class="text-input" type="text" id="cz-message"
+                           placeholder="e.g., With love from Andre ♥" maxlength="32">
+                </div>
+            </div>
+
+            <!-- Theme -->
+            <div class="settings-section">
+                <h3 class="section-title">🎨 Table Theme</h3>
+                <div class="theme-selection">
+                    <div class="theme-option" data-theme="classic">
+                        <div class="theme-preview" style="background:#1b4c2e;"></div>
+                        <span>Classic</span>
+                    </div>
+                    <div class="theme-option" data-theme="forest">
+                        <div class="theme-preview" style="background:linear-gradient(135deg,#1e4d2a,#3a8c50);"></div>
+                        <span>Forest</span>
+                    </div>
+                    <div class="theme-option" data-theme="ocean">
+                        <div class="theme-preview" style="background:linear-gradient(135deg,#1a3a6e,#3a7abf);"></div>
+                        <span>Ocean</span>
+                    </div>
+                    <div class="theme-option" data-theme="sunset">
+                        <div class="theme-preview" style="background:linear-gradient(135deg,#7a3520,#c05030);"></div>
+                        <span>Autumn</span>
+                    </div>
+                    <div class="theme-option" data-theme="purple">
+                        <div class="theme-preview" style="background:linear-gradient(135deg,#3d2060,#6a3a9e);"></div>
+                        <span>Violet</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sound -->
+            <div class="settings-section">
+                <h3 class="section-title">🎵 Sound Settings</h3>
+
+                <div class="sound-row">
+                    <span class="sound-label">🃏 Card Flip</span>
+                    <select class="sound-select" id="sound-flip">
+                        <option value="soft">Soft Click</option>
+                        <option value="classic">Classic Click</option>
+                        <option value="snap">Quick Snap</option>
+                        <option value="custom">Custom Audio</option>
+                        <option value="none">Silent</option>
+                    </select>
+                    <button class="sound-test" id="test-flip">▶</button>
+                    <button class="upload-btn-sm" id="audio-btn-flip">📁</button>
+                    <span id="audio-label-flip" style="font-size:0.8rem;color:green;"></span>
+                    <input class="file-input-hidden" type="file" id="audio-input-flip" accept="audio/*">
+                </div>
+
+                <div class="sound-row">
+                    <span class="sound-label">📥 Card Place</span>
+                    <select class="sound-select" id="sound-place">
+                        <option value="soft">Soft Thud</option>
+                        <option value="thud">Classic Thud</option>
+                        <option value="wood">Wood Knock</option>
+                        <option value="custom">Custom Audio</option>
+                        <option value="none">Silent</option>
+                    </select>
+                    <button class="sound-test" id="test-place">▶</button>
+                    <button class="upload-btn-sm" id="audio-btn-place">📁</button>
+                    <span id="audio-label-place" style="font-size:0.8rem;color:green;"></span>
+                    <input class="file-input-hidden" type="file" id="audio-input-place" accept="audio/*">
+                </div>
+
+                <div class="sound-row">
+                    <span class="sound-label">🎉 Win Sound</span>
+                    <select class="sound-select" id="sound-win">
+                        <option value="fanfare">Fanfare</option>
+                        <option value="bells">Bells</option>
+                        <option value="applause">Applause</option>
+                        <option value="custom">Custom Audio</option>
+                        <option value="none">Silent</option>
+                    </select>
+                    <button class="sound-test" id="test-win">▶</button>
+                    <button class="upload-btn-sm" id="audio-btn-win">📁</button>
+                    <span id="audio-label-win" style="font-size:0.8rem;color:green;"></span>
+                    <input class="file-input-hidden" type="file" id="audio-input-win" accept="audio/*">
+                </div>
+
+                <div class="volume-control">
+                    <span class="volume-label">🔊 Volume</span>
+                    <input class="volume-slider" type="range" id="volume-slider" min="0" max="100" value="75">
+                    <span class="volume-value" id="volume-value">75%</span>
+                </div>
+            </div>
+
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" id="resetSettingsBtn">Reset Defaults</button>
+            <button class="btn btn-primary" id="saveSettingsBtn">💾 Save &amp; Play</button>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════ VICTORY OVERLAY ═══ -->
+<div class="victory-overlay" id="victoryOverlay">
+    <div class="victory-content">
+        <div class="victory-emoji">🎉</div>
+        <h2 class="victory-title">You Won!</h2>
+        <p class="victory-stats" id="victory-stats"></p>
+        <div class="victory-buttons">
+            <button class="btn btn-primary" id="playAgainBtn">🔄 Play Again</button>
+            <button class="btn btn-ghost"   id="closeVictory">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SCRIPTS ═══ -->
+<script src="js/game.js"></script>
+<script src="js/customize.js"></script>
+<script src="js/sounds.js"></script>
+<script src="js/jokes.js"></script>
+<script src="js/autoplay.js"></script>
+<script src="js/render.js"></script>
+<script src="js/drag.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>

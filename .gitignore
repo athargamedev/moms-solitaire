@@ -1,0 +1,19 @@
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Gemini / AI assistant artifacts (local only)
+.gemini/
+
+# SPEC / design docs (optional – keep if you want)
+# SPEC.md
