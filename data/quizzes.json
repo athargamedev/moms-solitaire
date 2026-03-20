@@ -1,26 +1,26 @@
 [
   {
-    "question": "Qual e o jogo favorito da Mae?",
-    "answer": "Solitaire",
-    "category": "fun_fact",
+    "question": "Quem e o irmao mais velho da familia?",
+    "answer": "Raimundo",
+    "category": "relationship",
     "difficulty": "easy"
   },
   {
-    "question": "Quantos naipes tem um baralho?",
-    "answer": "4",
-    "category": "fun_fact",
+    "question": "Qual o nome da cunhada da Mae?",
+    "answer": "Bete",
+    "category": "relationship",
     "difficulty": "easy"
   },
   {
-    "question": "Qual carta vale mais no Solitaire?",
-    "answer": "Rei",
-    "category": "fun_fact",
-    "difficulty": "easy"
-  },
-  {
-    "question": "Quantas cartas tem um baralho completo?",
-    "answer": "52",
-    "category": "fun_fact",
+    "question": "Quantos sobrinhos a Mae tem?",
+    "answer": "2",
+    "category": "relationship",
     "difficulty": "medium"
+  },
+  {
+    "question": "Quem fez esse jogo de presente para a Mae?",
+    "answer": "Andre",
+    "category": "fun_fact",
+    "difficulty": "easy"
   }
 ]
