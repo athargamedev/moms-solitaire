@@ -1,0 +1,26 @@
+[
+  {
+    "question": "Qual e o jogo favorito da Mae?",
+    "answer": "Solitaire",
+    "category": "fun_fact",
+    "difficulty": "easy"
+  },
+  {
+    "question": "Quantos naipes tem um baralho?",
+    "answer": "4",
+    "category": "fun_fact",
+    "difficulty": "easy"
+  },
+  {
+    "question": "Qual carta vale mais no Solitaire?",
+    "answer": "Rei",
+    "category": "fun_fact",
+    "difficulty": "easy"
+  },
+  {
+    "question": "Quantas cartas tem um baralho completo?",
+    "answer": "52",
+    "category": "fun_fact",
+    "difficulty": "medium"
+  }
+]

@@ -419,3 +419,368 @@ body {
 .pulse-glow {
     animation: pulse-glow 1.4s ease-in-out infinite;
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   TOKEN BAR
+   ══════════════════════════════════════════════════════════════════════ */
+.token-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 16px;
+    background: rgba(0,0,0,0.25);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.token-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.06);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    user-select: none;
+    font-size: 0.82rem;
+}
+
+.token-item:hover {
+    background: rgba(255,255,255,0.12);
+    transform: translateY(-1px);
+}
+
+.token-item.token-empty {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.token-item.token-empty:hover {
+    background: rgba(255,255,255,0.06);
+    transform: none;
+}
+
+.token-item.token-available {
+    background: rgba(201,165,90,0.18);
+    border: 1px solid rgba(201,165,90,0.3);
+}
+
+.token-icon {
+    font-size: 1rem;
+}
+
+.token-count {
+    font-weight: 700;
+    color: var(--text-light);
+    min-width: 14px;
+    text-align: center;
+}
+
+.token-label {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+}
+
+.token-separator {
+    width: 1px;
+    height: 20px;
+    background: rgba(255,255,255,0.12);
+    margin: 0 4px;
+}
+
+.token-multiplier {
+    background: rgba(255,200,50,0.2) !important;
+    border: 1px solid rgba(255,200,50,0.4) !important;
+}
+
+.token-streak.streak-active {
+    background: rgba(255,100,30,0.2);
+    border: 1px solid rgba(255,100,30,0.4);
+}
+
+.token-streak.streak-active .token-count {
+    color: #ff8844;
+}
+
+/* Token earn animation */
+@keyframes token-pop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.35); }
+    100% { transform: scale(1); }
+}
+
+.token-earned {
+    animation: token-pop 0.5s ease;
+}
+
+.token-earned .token-count {
+    color: #f9d97a !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   FAMILY CHEER SQUAD
+   ══════════════════════════════════════════════════════════════════════ */
+.cheer-squad {
+    display: flex;
+    justify-content: center;
+    padding: 8px 16px;
+    background: rgba(0,0,0,0.2);
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.cheer-squad-inner {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding: 4px 0;
+}
+
+.cheer-member {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.cheer-member:hover {
+    transform: translateY(-2px);
+}
+
+.cheer-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid rgba(201,165,90,0.5);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #fff;
+    font-size: 1.1rem;
+}
+
+.cheer-avatar:hover {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 12px rgba(201,165,90,0.4);
+}
+
+.cheer-avatar.cheer-birthday {
+    border-color: #f9d97a;
+    box-shadow: 0 0 16px rgba(249,217,122,0.5);
+    animation: birthday-glow 2s ease-in-out infinite;
+}
+
+@keyframes birthday-glow {
+    0%, 100% { box-shadow: 0 0 8px rgba(249,217,122,0.4); }
+    50%      { box-shadow: 0 0 20px rgba(249,217,122,0.7); }
+}
+
+.cheer-crown {
+    position: absolute;
+    top: -8px;
+    right: -4px;
+    font-size: 0.85rem;
+}
+
+.cheer-name {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    max-width: 56px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cheer-initial {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   STATS MODAL
+   ══════════════════════════════════════════════════════════════════════ */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 14px;
+}
+
+.stats-card {
+    background: rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 10px;
+    padding: 16px 12px;
+    text-align: center;
+}
+
+.stats-card-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    margin-bottom: 4px;
+}
+
+.stats-card-label {
+    font-size: 0.78rem;
+    color: var(--text-dark);
+    opacity: 0.7;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   PEEK MODE
+   ══════════════════════════════════════════════════════════════════════ */
+body.peek-mode .card.face-down {
+    cursor: crosshair;
+    animation: peek-pulse 1s ease-in-out infinite;
+}
+
+@keyframes peek-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(201,165,90,0); }
+    50%      { box-shadow: 0 0 12px 4px rgba(201,165,90,0.4); }
+}
+
+.peek-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 5000;
+    gap: 12px;
+}
+
+.peek-card {
+    background: var(--card-white, #fdf9f4);
+    border-radius: 10px;
+    padding: 20px 30px;
+    font-size: 2.5rem;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.peek-card.red { color: var(--accent-rose, #b85c5c); }
+.peek-card.black { color: var(--text-dark, #2c2c2c); }
+
+.peek-timer {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   TIME FREEZE
+   ══════════════════════════════════════════════════════════════════════ */
+body.time-frozen .status-item:nth-child(2) {
+    animation: freeze-flash 1s ease-in-out infinite;
+}
+
+@keyframes freeze-flash {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.3; color: #60a5fa; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   VICTORY ENHANCEMENTS
+   ══════════════════════════════════════════════════════════════════════ */
+.victory-quiz-stats,
+.victory-tokens {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin: 8px 0;
+}
+
+.victory-family-cheers {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 12px 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.victory-cheer-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.victory-cheer-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.victory-cheer-initial {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   BIRTHDAY BADGE (character bubble)
+   ══════════════════════════════════════════════════════════════════════ */
+.char-birthday-badge {
+    font-size: 0.9rem;
+    margin-left: 4px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+    .token-bar {
+        gap: 3px;
+        padding: 4px 8px;
+        flex-wrap: wrap;
+    }
+    .token-item {
+        padding: 3px 6px;
+        font-size: 0.75rem;
+    }
+    .token-label {
+        display: none;
+    }
+    .cheer-squad-inner {
+        gap: 10px;
+    }
+    .cheer-avatar {
+        width: 36px;
+        height: 36px;
+    }
+    .cheer-name {
+        font-size: 0.6rem;
+    }
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
