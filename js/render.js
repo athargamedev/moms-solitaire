@@ -152,7 +152,7 @@ function updateStats() {
     const t = G.time;
     const m = Math.floor(t / 60).toString().padStart(2, '0');
     const s = (t % 60).toString().padStart(2, '0');
-    document.getElementById('timeDisplay').textContent = `${m}:${s}`;
+    document.getElementById('timeDisplay').textContent = `${m}:${s}s`;
 }
 
 // ── TOKEN BAR ─────────────────────────────────────────────────────────────────

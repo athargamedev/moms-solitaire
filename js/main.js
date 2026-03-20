@@ -129,8 +129,30 @@ function showHint() {
         }
     }
     addHL(`#${hint.to}`);
+    spawnAndreHelper(hint.to); // Peek-a-boo helper!
+
     setTimeout(() => document.querySelectorAll('.hint-highlight').forEach(el => el.classList.remove('hint-highlight')), 2200);
     showToast('Try that highlighted card!');
+}
+
+/**
+ * Spawns a temporary 'Andre' helper behind a pile to draw attention.
+ */
+function spawnAndreHelper(pileId) {
+    const parent = document.getElementById(pileId);
+    if (!parent) return;
+
+    // Clean up existing
+    parent.querySelectorAll('.andre-hint-helper').forEach(el => el.remove());
+
+    const helper = document.createElement('div');
+    helper.className = 'andre-hint-helper';
+    // Use the relative path to the character asset
+    helper.style.backgroundImage = 'url("characters/andre-filho/andre-card.png")';
+    parent.appendChild(helper);
+
+    // Auto-remove after animation
+    setTimeout(() => { if (helper.parentNode) helper.remove(); }, 2800);
 }
 
 /**

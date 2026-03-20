@@ -63,9 +63,9 @@
 
 /* ── SLIDE FOUNDATION ───────────────────── */
 @keyframes slide-to-foundation {
-    0%   { transform: scale(1)   opacity: 1; }
-    50%  { transform: scale(1.1) opacity: 0.85; }
-    100% { transform: scale(1)   opacity: 1; }
+    0%   { transform: scale(1);   opacity: 1; }
+    50%  { transform: scale(1.1); opacity: 0.85; }
+    100% { transform: scale(1);   opacity: 1; }
 }
 
 /* ── PULSE VALID ─────────────────────────── */
@@ -86,3 +86,25 @@
 }
 
 .card.shake { animation: shake 0.4s ease; }
+
+/* ── ANDRE HINT HELPER PEEK ──────────────── */
+@keyframes andre-peek {
+    0%   { transform: translate(-50%, 0);     opacity: 0; }
+    20%  { transform: translate(-50%, -100%);  opacity: 1; }
+    80%  { transform: translate(-50%, -100%);  opacity: 1; }
+    100% { transform: translate(-50%, 0);     opacity: 0; }
+}
+
+.andre-hint-helper {
+    position: absolute;
+    top: 0; /* Rooted at the top of the pile */
+    left: 50%;
+    width: 150px; /* Slightly wider than the card width (100px) */
+    height: 180px; 
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    z-index: 0; /* Behind the first card (z-index 1) but on the board */
+    pointer-events: none;
+    animation: andre-peek 3.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
