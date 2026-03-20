@@ -211,9 +211,11 @@ function showBirthdayGreeting() {
     }
 
     document.getElementById('birthdayName').textContent = `Feliz Aniversario, ${char.name}!`;
-    document.getElementById('birthdayMessage').textContent =
-        `Hoje e o aniversario de ${char.name} (${char.relation || 'Familia'})! ` +
-        `Vamos jogar em homenagem a essa pessoa especial!`;
+    const customGreeting = char.birthdayGreeting;
+    document.getElementById('birthdayMessage').textContent = customGreeting
+        ? customGreeting
+        : `Hoje e o aniversario de ${char.name} (${char.relation || 'Familia'})! ` +
+          `Vamos jogar em homenagem a essa pessoa especial!`;
 
     overlay.classList.add('active');
 }

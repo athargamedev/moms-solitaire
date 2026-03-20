@@ -114,6 +114,45 @@
                     </div>
                 </div>
 
+            </div>
+
+            <!-- Personal Info (for quizzes & birthday detection) -->
+            <div class="adm-form-grid" style="margin-top:16px;">
+                <div class="adm-form-group" style="grid-column: span 2;">
+                    <div style="font-size:0.85rem;font-weight:600;color:var(--accent-gold, #c9a55a);margin-bottom:8px;">🎂 Personal Info & Birthday</div>
+                </div>
+                <div class="adm-form-group">
+                    <label class="adm-form-label" for="fBirthday">Birthday</label>
+                    <input class="adm-input" type="text" id="fBirthday" placeholder="e.g. 14 de maio, May 14, 14/05" maxlength="40">
+                </div>
+                <div class="adm-form-group">
+                    <label class="adm-form-label" for="fBirthYear">Birth Year</label>
+                    <input class="adm-input" type="text" id="fBirthYear" placeholder="e.g. 1965" maxlength="4">
+                </div>
+                <div class="adm-form-group full">
+                    <label class="adm-form-label" for="fBirthdayGreeting">Birthday Greeting Message</label>
+                    <input class="adm-input" type="text" id="fBirthdayGreeting" placeholder="e.g. Feliz aniversario querida! Te amo!" maxlength="120">
+                    <small style="color:var(--text-muted);font-size:0.72rem;">Shown as a special popup when you play on their birthday</small>
+                </div>
+                <div class="adm-form-group">
+                    <label class="adm-form-label" for="fHometown">Hometown</label>
+                    <input class="adm-input" type="text" id="fHometown" placeholder="e.g. Belem" maxlength="60">
+                </div>
+                <div class="adm-form-group">
+                    <label class="adm-form-label" for="fWorkplace">Workplace</label>
+                    <input class="adm-input" type="text" id="fWorkplace" placeholder="e.g. Hospital Santa Casa" maxlength="80">
+                </div>
+                <div class="adm-form-group">
+                    <label class="adm-form-label" for="fEducation">Education</label>
+                    <input class="adm-input" type="text" id="fEducation" placeholder="e.g. UFPA" maxlength="80">
+                </div>
+                <div class="adm-form-group">
+                    <label class="adm-form-label" for="fFunFact">Fun Fact</label>
+                    <input class="adm-input" type="text" id="fFunFact" placeholder="e.g. Loves cooking feijoada" maxlength="120">
+                </div>
+            </div>
+
+            <div class="adm-form-grid" style="margin-top:16px;">
                 <!-- Avatar Upload -->
                 <div class="adm-form-group full">
                     <label class="adm-form-label">Photo</label>
@@ -281,11 +320,12 @@ function renderList() {
             ? `<img class="adm-char-thumb" src="${c.avatar}" alt="${c.name}">`
             : `<div class="adm-char-thumb-initial" style="background:${c.color || '#c9a55a'}">${c.name.charAt(0).toUpperCase()}</div>`;
 
+        const bdayTag = c.birthday ? `<span style="font-size:0.7rem;opacity:0.7;"> 🎂 ${esc(c.birthday)}</span>` : '';
         card.innerHTML = `
             ${thumb}
             <div class="adm-char-info">
                 <strong>${esc(c.name)}</strong>
-                <em>${esc(c.relation || '')} · ${esc(c.personality || 'funny')}</em>
+                <em>${esc(c.relation || '')} · ${esc(c.personality || 'funny')}${bdayTag}</em>
             </div>
             <div class="adm-char-actions">
                 <button class="adm-char-action-btn del" title="Delete" onclick="deleteChar(event,'${c.id}')">🗑</button>
@@ -311,6 +351,15 @@ function openNew() {
     document.getElementById('accordionBody').style.display   = 'none';
     document.getElementById('accordionMainChevron').textContent = '▼';
 
+    // Personal info fields
+    document.getElementById('fBirthday').value          = '';
+    document.getElementById('fBirthYear').value         = '';
+    document.getElementById('fBirthdayGreeting').value  = '';
+    document.getElementById('fHometown').value           = '';
+    document.getElementById('fWorkplace').value          = '';
+    document.getElementById('fEducation').value          = '';
+    document.getElementById('fFunFact').value            = '';
+
     resetAvatarUI(null);
     buildEventsGrid(Object.keys(EVENT_LABELS)); // all checked by default
     buildAccordion({});
@@ -334,6 +383,15 @@ function openEdit(id) {
     document.getElementById('deleteCharBtn').style.display   = 'inline-flex';
     document.getElementById('accordionBody').style.display   = 'none';
     document.getElementById('accordionMainChevron').textContent = '▼';
+
+    // Personal info fields
+    document.getElementById('fBirthday').value          = c.birthday || '';
+    document.getElementById('fBirthYear').value         = c.birthYear || '';
+    document.getElementById('fBirthdayGreeting').value  = c.birthdayGreeting || '';
+    document.getElementById('fHometown').value           = c.hometown || '';
+    document.getElementById('fWorkplace').value          = c.workplace || '';
+    document.getElementById('fEducation').value          = c.education || '';
+    document.getElementById('fFunFact').value            = c.funFact || '';
 
     resetAvatarUI(c.avatar || null);
     buildEventsGrid(c.activeEvents || Object.keys(EVENT_LABELS));
@@ -366,12 +424,21 @@ function saveChar() {
     const messages = readMessagesFromForm();
 
     const char = {
-        id:           editingId || uuid(),
-        name:         name,
-        relation:     document.getElementById('fRelation').value.trim(),
-        avatar:       currentAvatar,
-        color:        document.getElementById('fColor').value,
-        personality:  document.getElementById('fPersonality').value,
+        id:               editingId || uuid(),
+        name:             name,
+        relation:         document.getElementById('fRelation').value.trim(),
+        avatar:           currentAvatar,
+        color:            document.getElementById('fColor').value,
+        personality:      document.getElementById('fPersonality').value,
+        // Personal info
+        birthday:         document.getElementById('fBirthday').value.trim() || null,
+        birthYear:        document.getElementById('fBirthYear').value.trim() || null,
+        birthdayGreeting: document.getElementById('fBirthdayGreeting').value.trim() || null,
+        hometown:         document.getElementById('fHometown').value.trim() || null,
+        workplace:        document.getElementById('fWorkplace').value.trim() || null,
+        education:        document.getElementById('fEducation').value.trim() || null,
+        funFact:          document.getElementById('fFunFact').value.trim() || null,
+        // Game data
         messages:     messages,
         quizzes:      readQuizzesFromForm(),
         activeEvents: readActiveEvents(),
