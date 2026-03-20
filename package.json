@@ -4,7 +4,10 @@
   "description": "A beautiful, fully personalized **Klondike Solitaire** game built as a single local web app — no server, no installation, no internet required. Just open `index.html` in any browser and play!",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "scrape": "node scripts/scrape_facebook.js",
+    "setup-scraper": "npx playwright install chromium"
   },
   "repository": {
     "type": "git",
