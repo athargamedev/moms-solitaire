@@ -1,97 +1,290 @@
 /**
- * quizzes.js – Family Trivia Quiz Engine
- * Integrates directly with characters.js to grab quizzes
- * and grant rewards (like auto-playing a move) if answered correctly.
+ * quizzes.js -- Family Trivia Quiz Engine (Overhauled)
+ * Features: difficulty tiers, categories, timer, cooldown, auto-triggers,
+ * streak tracking, and rich rewards via tokens.js.
  */
 
-function openTriviaForHelp() {
-    // Collect all characters with at least one quiz
-    const charsWithQuizzes = (_characters || []).filter(c => c.quizzes && c.quizzes.length > 0);
+// Quiz history to avoid repeats in the same session
+let _quizHistory = [];
+let _triviaTimerInterval = null;
+let _triviaTimeLeft = 0;
+let _currentQuizDifficulty = 'easy';
 
-    if (charsWithQuizzes.length === 0) {
-        // No quizzes available in the DB, just fall back to normal behavior
-        showCharacterBubble('stockSpam', "I don't have any quizzes yet! Have a free move! 🎁", 3000);
-        playNextMove(); // defined in autoplay.js
-        return;
+// ── QUIZ BANK ─────────────────────────────────────────────────────────────────
+// Merges character quizzes + dedicated quiz bank + auto-generated relationship quizzes
+
+function getAllQuizzes() {
+    const quizzes = [];
+
+    // 1. Character-based quizzes (from roster)
+    (_characters || []).forEach(c => {
+        if (c.quizzes && c.quizzes.length > 0) {
+            c.quizzes.forEach(q => {
+                quizzes.push({
+                    ...q,
+                    charId: c.id,
+                    charName: c.name,
+                    charAvatar: c.avatar,
+                    charColor: c.color,
+                    charRelation: c.relation,
+                    category: q.category || 'personal',
+                    difficulty: q.difficulty || 'easy',
+                });
+            });
+        }
+    });
+
+    // 2. Auto-generate relationship quizzes from roster data
+    const chars = _characters || [];
+    if (chars.length >= 2) {
+        chars.forEach(c => {
+            if (c.relation) {
+                quizzes.push({
+                    question: `Qual e o parentesco de ${c.name} com a Mae?`,
+                    answer: c.relation,
+                    charId: c.id,
+                    charName: c.name,
+                    charAvatar: c.avatar,
+                    charColor: c.color,
+                    charRelation: c.relation,
+                    category: 'relationship',
+                    difficulty: 'easy',
+                });
+            }
+            // Photo identification quiz
+            if (c.avatar) {
+                quizzes.push({
+                    question: 'De quem e essa foto?',
+                    answer: c.name,
+                    charId: c.id,
+                    charName: c.name,
+                    charAvatar: c.avatar,
+                    charColor: c.color,
+                    charRelation: c.relation,
+                    category: 'photo',
+                    difficulty: 'medium',
+                    isPhotoQuiz: true,
+                });
+            }
+            // Hometown quiz
+            if (c.hometown) {
+                quizzes.push({
+                    question: `De onde e ${c.name}?`,
+                    answer: c.hometown,
+                    charId: c.id,
+                    charName: c.name,
+                    charAvatar: c.avatar,
+                    charColor: c.color,
+                    charRelation: c.relation,
+                    category: 'hometown',
+                    difficulty: 'medium',
+                });
+            }
+            // Workplace quiz
+            if (c.workplace) {
+                quizzes.push({
+                    question: `Onde ${c.name} trabalha?`,
+                    answer: c.workplace,
+                    charId: c.id,
+                    charName: c.name,
+                    charAvatar: c.avatar,
+                    charColor: c.color,
+                    charRelation: c.relation,
+                    category: 'work',
+                    difficulty: 'medium',
+                });
+            }
+            // Education quiz
+            if (c.education) {
+                quizzes.push({
+                    question: `Onde ${c.name} estudou?`,
+                    answer: c.education,
+                    charId: c.id,
+                    charName: c.name,
+                    charAvatar: c.avatar,
+                    charColor: c.color,
+                    charRelation: c.relation,
+                    category: 'education',
+                    difficulty: 'hard',
+                });
+            }
+        });
     }
 
-    // Pick a random char and random quiz
-    const char = charsWithQuizzes[Math.floor(Math.random() * charsWithQuizzes.length)];
-    const quiz = char.quizzes[Math.floor(Math.random() * char.quizzes.length)];
-
-    // Generate multiple choice options (1 correct, 2 distractors)
-    const options = generateOptions(quiz, charsWithQuizzes);
-
-    renderTriviaUI(char, quiz, options);
-    document.getElementById('triviaOverlay').classList.add('show');
+    return quizzes;
 }
 
-function closeTrivia() {
-    const overlay = document.getElementById('triviaOverlay');
-    overlay.classList.remove('show');
-    // small delay for css transition
-    setTimeout(() => {
-        document.getElementById('triviaOptions').innerHTML = '';
-        document.getElementById('triviaFeedback').innerHTML = '';
-    }, 300);
+/**
+ * Pick a quiz that has not been asked in this session, matching the desired difficulty.
+ * Falls back to any difficulty if none match.
+ */
+function pickQuiz(preferredDifficulty) {
+    const all = getAllQuizzes();
+    if (all.length === 0) return null;
+
+    // Filter out recently asked questions
+    const fresh = all.filter(q => !_quizHistory.includes(q.question));
+    const pool = fresh.length > 0 ? fresh : all; // reset if all asked
+
+    // Try preferred difficulty first
+    let candidates = pool.filter(q => q.difficulty === preferredDifficulty);
+    if (candidates.length === 0) candidates = pool;
+
+    const quiz = candidates[Math.floor(Math.random() * candidates.length)];
+    _quizHistory.push(quiz.question);
+    // Keep history manageable
+    if (_quizHistory.length > 50) _quizHistory = _quizHistory.slice(-30);
+
+    return quiz;
 }
 
-function generateOptions(correctQuiz, allChars) {
+// ── GENERATE OPTIONS ──────────────────────────────────────────────────────────
+
+function generateOptions(correctQuiz, numOptions) {
     const opts = [correctQuiz.answer];
-    
-    // Attempt to find similar answers from other quizzes
-    const allAnswers = [];
-    allChars.forEach(c => c.quizzes.forEach(q => {
-        if (q.answer !== correctQuiz.answer) allAnswers.push(q.answer);
-    }));
-    
-    // Deduplicate
-    const pool = [...new Set(allAnswers)];
-    
+    const allQuizzes = getAllQuizzes();
+
+    // Collect potential distractors from same category
+    const sameCat = allQuizzes
+        .filter(q => q.category === correctQuiz.category && q.answer !== correctQuiz.answer)
+        .map(q => q.answer);
+
+    // Also from all quizzes
+    const allAnswers = allQuizzes
+        .filter(q => q.answer !== correctQuiz.answer)
+        .map(q => q.answer);
+
+    const pool = [...new Set([...sameCat, ...allAnswers])];
+
     // Pull random distractors
-    while(opts.length < 3 && pool.length > 0) {
+    while (opts.length < numOptions && pool.length > 0) {
         const idx = Math.floor(Math.random() * pool.length);
-        opts.push(pool[idx]);
+        if (!opts.includes(pool[idx])) {
+            opts.push(pool[idx]);
+        }
         pool.splice(idx, 1);
     }
 
     // If still not enough, generate smart dummies
-    if (opts.length < 3) {
+    if (opts.length < numOptions) {
         if (/^\d{4}$/.test(correctQuiz.answer)) {
             const yr = parseInt(correctQuiz.answer);
             if (!opts.includes((yr - 2).toString())) opts.push((yr - 2).toString());
             if (!opts.includes((yr + 3).toString())) opts.push((yr + 3).toString());
-        } else if (/^\d{1,2} de \w+$/.test(correctQuiz.answer.toLowerCase())) { // e.g. "14 de maio"
-            opts.push("12 de março");
-            opts.push("25 de agosto");
+        } else if (/^\d{1,2} de \w+$/i.test(correctQuiz.answer)) {
+            if (!opts.includes('12 de marco')) opts.push('12 de marco');
+            if (!opts.includes('25 de agosto')) opts.push('25 de agosto');
         } else {
-            opts.push("I have absolutely no idea!");
-            opts.push("Ask me after coffee ☕");
+            if (!opts.includes('Nao sei!')) opts.push('Nao sei!');
+            if (!opts.includes('Pergunta depois do cafe')) opts.push('Pergunta depois do cafe');
         }
     }
 
-    // Shuffle array
-    return opts.sort(() => Math.random() - 0.5);
+    return opts.slice(0, numOptions).sort(() => Math.random() - 0.5);
 }
 
-function renderTriviaUI(char, quiz, options) {
-    document.getElementById('triviaName').textContent = char.name + (char.relation ? ` (${char.relation})` : '');
-    
+// ── DIFFICULTY CONFIG ─────────────────────────────────────────────────────────
+
+const DIFFICULTY_CONFIG = {
+    easy:   { options: 3, timerSeconds: 20, label: 'Facil',   color: '#6b9b7a' },
+    medium: { options: 4, timerSeconds: 15, label: 'Medio',   color: '#c9a55a' },
+    hard:   { options: 4, timerSeconds: 12, label: 'Dificil', color: '#b85c5c' },
+};
+
+// ── OPEN TRIVIA ───────────────────────────────────────────────────────────────
+
+/**
+ * Open the trivia modal for a quiz. Called from the brain button or auto-triggers.
+ * @param {string} difficulty - 'easy' | 'medium' | 'hard'
+ * @param {boolean} isAutoTrigger - if true, skips cooldown check
+ */
+function openTriviaForHelp(difficulty, isAutoTrigger) {
+    difficulty = difficulty || 'easy';
+
+    // Check cooldown for voluntary quizzes
+    if (!isAutoTrigger && typeof canTriggerQuiz === 'function' && !canTriggerQuiz()) {
+        const remaining = getQuizCooldownRemaining();
+        if (typeof showToast === 'function') showToast(`Quiz cooldown: ${remaining}s remaining`);
+        return;
+    }
+
+    const quiz = pickQuiz(difficulty);
+
+    if (!quiz) {
+        showCharacterBubble('stockSpam', "I don't have any quizzes yet! Have a free move!", 3000);
+        if (typeof playNextMove === 'function') playNextMove();
+        return;
+    }
+
+    _currentQuizDifficulty = quiz.difficulty || difficulty;
+    const config = DIFFICULTY_CONFIG[_currentQuizDifficulty] || DIFFICULTY_CONFIG.easy;
+    const options = generateOptions(quiz, config.options);
+
+    renderTriviaUI(quiz, options, config);
+    startTriviaTimer(config.timerSeconds, quiz.answer);
+
+    if (typeof markQuizTriggered === 'function') markQuizTriggered();
+
+    document.getElementById('triviaOverlay').classList.add('active');
+}
+
+function closeTrivia() {
+    const overlay = document.getElementById('triviaOverlay');
+    overlay.classList.remove('active');
+    stopTriviaTimer();
+    setTimeout(() => {
+        const optsEl = document.getElementById('triviaOptions');
+        const fbEl = document.getElementById('triviaFeedback');
+        const rwEl = document.getElementById('triviaReward');
+        if (optsEl) optsEl.innerHTML = '';
+        if (fbEl) fbEl.innerHTML = '';
+        if (rwEl) { rwEl.innerHTML = ''; rwEl.style.display = 'none'; }
+    }, 300);
+}
+
+// ── RENDER TRIVIA UI ──────────────────────────────────────────────────────────
+
+function renderTriviaUI(quiz, options, config) {
+    // Character info
+    const nameEl = document.getElementById('triviaName');
+    nameEl.textContent = quiz.charName + (quiz.charRelation ? ` (${quiz.charRelation})` : '');
+
     const avatar = document.getElementById('triviaAvatar');
-    if (char.avatar) {
-        avatar.style.backgroundImage = `url('${char.avatar}')`;
+    if (quiz.charAvatar) {
+        avatar.style.backgroundImage = `url('${quiz.charAvatar}')`;
         avatar.textContent = '';
     } else {
         avatar.style.backgroundImage = 'none';
-        avatar.style.backgroundColor = char.color || '#c9a55a';
-        avatar.textContent = char.name.charAt(0).toUpperCase();
+        avatar.style.backgroundColor = quiz.charColor || '#c9a55a';
+        avatar.textContent = (quiz.charName || '?').charAt(0).toUpperCase();
     }
 
+    // For photo quizzes, blur the avatar as the challenge
+    if (quiz.isPhotoQuiz) {
+        avatar.style.filter = 'blur(8px)';
+    } else {
+        avatar.style.filter = 'none';
+    }
+
+    // Difficulty badge
+    const diffBadge = document.getElementById('triviaDifficulty');
+    if (diffBadge) {
+        diffBadge.textContent = config.label;
+        diffBadge.style.background = config.color;
+        diffBadge.style.color = '#fff';
+    }
+
+    // Question
     document.getElementById('triviaQuestion').textContent = quiz.question;
+
+    // Clear feedback and reward
     const feedback = document.getElementById('triviaFeedback');
     feedback.textContent = '';
     feedback.className = 'trivia-feedback';
+    const reward = document.getElementById('triviaReward');
+    if (reward) { reward.innerHTML = ''; reward.style.display = 'none'; }
 
+    // Options
     const optsWrap = document.getElementById('triviaOptions');
     optsWrap.innerHTML = '';
 
@@ -104,11 +297,69 @@ function renderTriviaUI(char, quiz, options) {
     });
 }
 
-function handleTriviaAnswer(btn, selected, correct) {
+// ── TIMER ─────────────────────────────────────────────────────────────────────
+
+function startTriviaTimer(seconds, correctAnswer) {
+    stopTriviaTimer();
+    _triviaTimeLeft = seconds;
+
+    const fill = document.getElementById('triviaTimerFill');
+    const bar = document.getElementById('triviaTimerBar');
+    if (fill) {
+        fill.style.transition = 'none';
+        fill.style.width = '100%';
+        // Force reflow
+        fill.offsetHeight;
+        fill.style.transition = `width ${seconds}s linear`;
+        fill.style.width = '0%';
+    }
+    if (bar) bar.style.display = 'block';
+
+    _triviaTimerInterval = setInterval(() => {
+        _triviaTimeLeft--;
+        if (_triviaTimeLeft <= 0) {
+            stopTriviaTimer();
+            handleTriviaTimeout(correctAnswer);
+        }
+    }, 1000);
+}
+
+function stopTriviaTimer() {
+    clearInterval(_triviaTimerInterval);
+    _triviaTimerInterval = null;
+    const fill = document.getElementById('triviaTimerFill');
+    if (fill) {
+        fill.style.transition = 'none';
+        fill.style.width = '0%';
+    }
+}
+
+function handleTriviaTimeout(correctAnswer) {
     const feedback = document.getElementById('triviaFeedback');
     const btns = document.querySelectorAll('.trivia-option-btn');
-    
-    // Disable all so they can't spam clicks
+    btns.forEach(b => {
+        b.disabled = true;
+        if (b.textContent === correctAnswer) {
+            b.style.background = 'rgba(76, 175, 80, 0.2)';
+            b.style.borderColor = 'var(--success, #4CAF50)';
+            b.style.color = 'var(--success, #4CAF50)';
+        }
+    });
+    feedback.style.color = 'var(--danger, #F44336)';
+    feedback.innerHTML = 'Tempo esgotado! A resposta era: ' + correctAnswer;
+
+    if (typeof recordWrongAnswer === 'function') recordWrongAnswer();
+
+    setTimeout(() => closeTrivia(), 2500);
+}
+
+// ── HANDLE ANSWER ─────────────────────────────────────────────────────────────
+
+function handleTriviaAnswer(btn, selected, correct) {
+    stopTriviaTimer();
+    const feedback = document.getElementById('triviaFeedback');
+    const btns = document.querySelectorAll('.trivia-option-btn');
+
     btns.forEach(b => b.disabled = true);
 
     if (selected === correct) {
@@ -116,21 +367,36 @@ function handleTriviaAnswer(btn, selected, correct) {
         btn.style.color = '#fff';
         btn.style.borderColor = 'var(--success, #4CAF50)';
         feedback.style.color = 'var(--success, #4CAF50)';
-        feedback.innerHTML = '🎉 Acertou! You earned a free move!';
-        if (typeof playSound === 'function') playSound('flip'); // Or custom success
-        
+
+        // Apply rewards
+        const rewards = (typeof applyQuizReward === 'function')
+            ? applyQuizReward(_currentQuizDifficulty)
+            : { tokens: [], message: 'Correct!' };
+
+        feedback.innerHTML = '🎉 Acertou!';
+
+        // Show reward details
+        const rewardEl = document.getElementById('triviaReward');
+        if (rewardEl && rewards.message) {
+            rewardEl.textContent = rewards.message;
+            rewardEl.style.display = 'block';
+            rewardEl.className = 'trivia-reward trivia-reward-success';
+        }
+
+        if (typeof playSound === 'function') playSound('flip');
+
         setTimeout(() => {
             closeTrivia();
-            playNextMove(); // Grant reward: the game plays the best move for her!
-        }, 1800);
+            if (typeof fullRender === 'function') fullRender();
+        }, 2000);
     } else {
         btn.style.background = 'var(--danger, #F44336)';
         btn.style.color = '#fff';
         btn.style.borderColor = 'var(--danger, #F44336)';
         feedback.style.color = 'var(--danger, #F44336)';
-        feedback.innerHTML = '❌ Oops! Errou. Try again later!';
-        
-        // Paint the correct one green to teach her
+        feedback.innerHTML = 'Errou! A resposta era: ' + correct;
+
+        // Paint the correct one
         btns.forEach(b => {
             if (b.textContent === correct) {
                 b.style.background = 'rgba(76, 175, 80, 0.2)';
@@ -139,8 +405,61 @@ function handleTriviaAnswer(btn, selected, correct) {
             }
         });
 
-        setTimeout(() => {
-            closeTrivia();
-        }, 2500);
+        if (typeof recordWrongAnswer === 'function') recordWrongAnswer();
+
+        const rewardEl = document.getElementById('triviaReward');
+        if (rewardEl) {
+            rewardEl.textContent = 'Streak quebrado!';
+            rewardEl.style.display = 'block';
+            rewardEl.className = 'trivia-reward trivia-reward-fail';
+        }
+
+        setTimeout(() => closeTrivia(), 2500);
+    }
+}
+
+// ── AUTO-TRIGGER QUIZZES ──────────────────────────────────────────────────────
+
+/**
+ * Called from the timer loop. Checks if we should pop up an automatic quiz.
+ */
+function checkAutoQuizTriggers() {
+    if (G.won || !G.started) return;
+
+    // Stuck for 30+ seconds -- offer help quiz
+    if (typeof isPlayerStuck === 'function' && isPlayerStuck()) {
+        // Only trigger once per stuck period
+        if (!G._stuckQuizOffered) {
+            G._stuckQuizOffered = true;
+            showCharacterBubble('stuck', 'Precisa de ajuda? Responda uma pergunta da familia!', 4000);
+            setTimeout(() => {
+                if (isPlayerStuck()) openTriviaForHelp('easy', true);
+            }, 4500);
+        }
+    } else {
+        G._stuckQuizOffered = false;
+    }
+}
+
+/**
+ * Called when progress milestones are hit. May trigger a bonus quiz.
+ */
+function checkMilestoneQuiz() {
+    const total = G.foundations.reduce((s, f) => s + f.length, 0);
+    const pct = Math.round((total / 52) * 100);
+
+    // Trigger quiz at 25%, 50%, 75%
+    const milestones = [25, 50, 75];
+    for (const m of milestones) {
+        const key = `_milestone${m}Quiz`;
+        if (pct >= m && !G[key]) {
+            G[key] = true;
+            const difficulty = m <= 25 ? 'easy' : m <= 50 ? 'medium' : 'hard';
+            setTimeout(() => {
+                showCharacterBubble('foundation', `${pct}% completo! Quiz bonus!`, 3000);
+                setTimeout(() => openTriviaForHelp(difficulty, true), 3500);
+            }, 1000);
+            break; // Only one milestone at a time
+        }
     }
 }

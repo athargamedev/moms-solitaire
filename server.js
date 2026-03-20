@@ -102,11 +102,43 @@ app.post('/api/scrape', (req, res) => {
     }
 });
 
+// ----------------------------------------------------
+// QUIZ BANK API
+// ----------------------------------------------------
+const QUIZ_PATH = path.join(__dirname, 'data', 'quizzes.json');
+
+// Ensure quizzes.json exists
+if (!fs.existsSync(QUIZ_PATH)) {
+    fs.writeFileSync(QUIZ_PATH, '[]');
+}
+
+// [GET] Load Quiz Bank
+app.get('/api/quizzes', (req, res) => {
+    try {
+        const data = fs.readFileSync(QUIZ_PATH, 'utf8');
+        res.json(JSON.parse(data));
+    } catch (e) {
+        res.status(500).json({ error: 'Failed to read quiz bank' });
+    }
+});
+
+// [POST] Save Quiz Bank (Bulk Update)
+app.post('/api/quizzes', (req, res) => {
+    try {
+        const quizzes = req.body;
+        if (!Array.isArray(quizzes)) throw new Error('Body must be an array');
+        fs.writeFileSync(QUIZ_PATH, JSON.stringify(quizzes, null, 2));
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // Start the authoring server
 app.listen(PORT, () => {
     console.log('====================================================');
-    console.log(`🎲 Mom's Solitaire - Local Authoring Server`);
-    console.log(`🚀 Admin Panel: http://localhost:${PORT}/admin.html`);
-    console.log(`🎮 Game Direct: http://localhost:${PORT}/index.html`);
+    console.log(`Mom's Solitaire - Local Authoring Server`);
+    console.log(`Admin Panel: http://localhost:${PORT}/admin.html`);
+    console.log(`Game Direct: http://localhost:${PORT}/index.html`);
     console.log('====================================================');
 });

@@ -1,0 +1,26 @@
+[
+  {
+    "question": "Quem e o irmao mais velho da familia?",
+    "answer": "Raimundo",
+    "category": "relationship",
+    "difficulty": "easy"
+  },
+  {
+    "question": "Qual o nome da cunhada da Mae?",
+    "answer": "Bete",
+    "category": "relationship",
+    "difficulty": "easy"
+  },
+  {
+    "question": "Quantos sobrinhos a Mae tem?",
+    "answer": "2",
+    "category": "relationship",
+    "difficulty": "medium"
+  },
+  {
+    "question": "Quem fez esse jogo de presente para a Mae?",
+    "answer": "Andre",
+    "category": "fun_fact",
+    "difficulty": "easy"
+  }
+]

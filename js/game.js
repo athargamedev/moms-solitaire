@@ -1,5 +1,5 @@
 /**
- * game.js – Core Klondike Solitaire state, rules, and logic.
+ * game.js -- Core Klondike Solitaire state, rules, and logic.
  * No DOM access here. Pure state management.
  */
 
@@ -24,6 +24,22 @@ function createInitialState() {
         time:        0,
         started:     false,
         won:         false,
+        // Token economy
+        tokens: {
+            undo: 0,
+            hint: 0,
+            peek: 0,
+            wand: 0,
+            timeFreeze: 0,
+            multiplier: 1,
+            multiplierMoves: 0
+        },
+        quizStreak:      0,
+        quizzesAnswered: 0,
+        quizzesCorrect:  0,
+        // Stuck detection
+        lastMoveTime:    0,
+        stockCycles:     0,
     };
 }
 
@@ -91,12 +107,14 @@ function drawFromStock(onDone) {
         if (G.waste.length === 0) return false;
         G.stock = G.waste.reverse().map(c => ({ ...c, faceUp: false }));
         G.waste = [];
+        G.stockCycles++;
     } else {
         const card = G.stock.pop();
         card.faceUp = true;
         G.waste.push(card);
     }
     G.moves++;
+    G.lastMoveTime = G.time;
     onDone?.('flip');
     return true;
 }
@@ -159,12 +177,17 @@ function moveCards(card, from, to) {
     // add to destination
     if (toType === 'foundation') {
         G.foundations[toIdx].push(...movedCards);
-        G.score += 10;
+        // Score with multiplier support
+        const multiplier = (G.tokens && G.tokens.multiplier > 1) ? G.tokens.multiplier : 1;
+        G.score += 10 * multiplier;
+        // Tick down the multiplier counter
+        if (typeof tickMultiplier === 'function') tickMultiplier();
     } else {
         G.tableau[toIdx].push(...movedCards);
     }
 
     G.moves++;
+    G.lastMoveTime = G.time;
     return 'place';
 }
 
@@ -179,9 +202,51 @@ function checkWin() {
     return G.foundations.reduce((s, f) => s + f.length, 0) === 52;
 }
 
+// ── STUCK CHECK ───────────────────────────────────────────────────────────────
+function hasAnyValidMove() {
+    // Check waste -> foundation/tableau
+    if (G.waste.length > 0) {
+        const c = G.waste[G.waste.length - 1];
+        for (let i = 0; i < 4; i++) {
+            if (canPlaceOnFoundation(c, i)) return true;
+        }
+        for (let i = 0; i < 7; i++) {
+            if (canPlaceOnTableau(c, i)) return true;
+        }
+    }
+    // Check tableau -> foundation or tableau
+    for (let i = 0; i < 7; i++) {
+        const pile = G.tableau[i];
+        if (pile.length === 0) continue;
+        const faceUp = pile.filter(c => c.faceUp);
+        if (faceUp.length === 0) continue;
+        const top = faceUp[faceUp.length - 1];
+        for (let j = 0; j < 4; j++) {
+            if (canPlaceOnFoundation(top, j)) return true;
+        }
+        for (let j = 0; j < 7; j++) {
+            if (j === i) continue;
+            if (canPlaceOnTableau(faceUp[0], j)) return true;
+        }
+    }
+    // Can draw from stock
+    if (G.stock.length > 0) return true;
+    // Can recycle waste
+    if (G.waste.length > 0 && G.stockCycles < 10) return true;
+    return false;
+}
+
+/**
+ * Check if the player seems stuck (no moves for 30+ seconds).
+ */
+function isPlayerStuck() {
+    if (!G.started || G.won) return false;
+    return (G.time - G.lastMoveTime) >= 30;
+}
+
 // ── HINT ──────────────────────────────────────────────────────────────────────
 function findHint() {
-    // Waste → foundation
+    // Waste -> foundation
     if (G.waste.length > 0) {
         const c = G.waste[G.waste.length - 1];
         for (let i = 0; i < 4; i++) {
@@ -191,7 +256,7 @@ function findHint() {
             if (canPlaceOnTableau(c, i)) return { from: 'waste', to: `tableau-${i}`, card: c };
         }
     }
-    // Tableau → foundation or better tableau
+    // Tableau -> foundation or better tableau
     for (let i = 0; i < 7; i++) {
         const pile = G.tableau[i];
         if (pile.length === 0) continue;
@@ -209,6 +274,76 @@ function findHint() {
     return null;
 }
 
+/**
+ * Multi-move lookahead hint. Tries to find a sequence of 2-3 moves
+ * that leads to a foundation placement.
+ */
+function findDeepHint() {
+    // First try the basic hint
+    const basic = findHint();
+    if (basic && basic.to.startsWith('foundation')) return basic;
+
+    // Try each possible move, then check if the resulting state has a foundation move
+    const originalState = JSON.stringify(G);
+    const moves = getAllValidMoves();
+
+    for (const move of moves) {
+        // Apply the move temporarily
+        G = JSON.parse(originalState);
+        const result = moveCards(move.card, move.from, move.to);
+        if (result) {
+            // Check if there is now a foundation move available
+            const followUp = findHint();
+            if (followUp && followUp.to.startsWith('foundation')) {
+                G = JSON.parse(originalState);
+                undoStack.pop(); // Remove the snapshot from the temp move
+                return move; // Return the first move that leads to a foundation placement
+            }
+        }
+        G = JSON.parse(originalState);
+        if (undoStack.length > 0) undoStack.pop();
+    }
+
+    G = JSON.parse(originalState);
+    return basic; // Fall back to basic hint
+}
+
+/**
+ * Get all valid moves from the current state.
+ */
+function getAllValidMoves() {
+    const moves = [];
+
+    // Waste moves
+    if (G.waste.length > 0) {
+        const c = G.waste[G.waste.length - 1];
+        for (let i = 0; i < 4; i++) {
+            if (canPlaceOnFoundation(c, i)) moves.push({ card: c, from: 'waste', to: `foundation-${i}` });
+        }
+        for (let i = 0; i < 7; i++) {
+            if (canPlaceOnTableau(c, i)) moves.push({ card: c, from: 'waste', to: `tableau-${i}` });
+        }
+    }
+
+    // Tableau moves
+    for (let i = 0; i < 7; i++) {
+        const pile = G.tableau[i];
+        if (pile.length === 0) continue;
+        const faceUp = pile.filter(c => c.faceUp);
+        if (faceUp.length === 0) continue;
+        const top = faceUp[faceUp.length - 1];
+        for (let j = 0; j < 4; j++) {
+            if (canPlaceOnFoundation(top, j)) moves.push({ card: top, from: `tableau-${i}`, to: `foundation-${j}` });
+        }
+        for (let j = 0; j < 7; j++) {
+            if (j === i) continue;
+            if (canPlaceOnTableau(faceUp[0], j)) moves.push({ card: faceUp[0], from: `tableau-${i}`, to: `tableau-${j}` });
+        }
+    }
+
+    return moves;
+}
+
 // ── SAVE / LOAD ───────────────────────────────────────────────────────────────
 const SAVE_KEY = 'momSolitaire_gameState';
 
@@ -220,7 +355,20 @@ function loadGame() {
     try {
         const raw = localStorage.getItem(SAVE_KEY);
         if (!raw) return false;
-        G = JSON.parse(raw);
+        const loaded = JSON.parse(raw);
+        // Ensure token state exists even for old saves
+        if (!loaded.tokens) {
+            loaded.tokens = {
+                undo: 0, hint: 0, peek: 0, wand: 0, timeFreeze: 0,
+                multiplier: 1, multiplierMoves: 0
+            };
+        }
+        if (loaded.quizStreak === undefined) loaded.quizStreak = 0;
+        if (loaded.quizzesAnswered === undefined) loaded.quizzesAnswered = 0;
+        if (loaded.quizzesCorrect === undefined) loaded.quizzesCorrect = 0;
+        if (loaded.lastMoveTime === undefined) loaded.lastMoveTime = 0;
+        if (loaded.stockCycles === undefined) loaded.stockCycles = 0;
+        G = loaded;
         return true;
     } catch(e) { return false; }
 }

@@ -1,6 +1,7 @@
 /**
- * main.js – App entry point: wires up all modules.
- * Load order: game.js → customize.js → sounds.js → jokes.js → autoplay.js → render.js → drag.js → main.js
+ * main.js -- App entry point: wires up all modules.
+ * Load order: game.js -> customize.js -> sounds.js -> jokes.js -> characters.js
+ *             -> tokens.js -> autoplay.js -> quizzes.js -> render.js -> drag.js -> main.js
  */
 
 // ── TIMER ─────────────────────────────────────────────────────────────────────
@@ -10,6 +11,11 @@ function startTimer() {
     if (G.started || G.won) return;
     G.started = true;
     _timerInterval = setInterval(() => {
+        // Time freeze support
+        if (typeof isTimeFrozen === 'function' && isTimeFrozen()) {
+            updateStats();
+            return;
+        }
         G.time++;
         updateStats();
         // Long game jokes
@@ -17,6 +23,12 @@ function startTimer() {
         if (G.time === 1200) onLongGame(20);
         // Milestone checks
         onMilestone(G.moves);
+        // Auto quiz triggers (check every 5 seconds to avoid spam)
+        if (G.time % 5 === 0 && typeof checkAutoQuizTriggers === 'function') {
+            checkAutoQuizTriggers();
+        }
+        // Stock exhaustion check
+        if (typeof checkStockExhaustion === 'function') checkStockExhaustion();
     }, 1000);
 }
 
@@ -39,7 +51,11 @@ function triggerWin() {
     G.score += Math.max(0, Math.floor(100000 / (G.time + 1)));
     updateStats();
     playSound('win');
-    showJokeBubble(getJoke('win'), 5000);
+    showCharacterBubble('win', getJoke('win'), 5000);
+
+    // Record stats
+    if (typeof recordGameWin === 'function') recordGameWin(G.time, G.score);
+
     setTimeout(() => showVictory(), 800);
     spawnConfetti();
 }
@@ -48,6 +64,10 @@ function showVictory() {
     const el = document.getElementById('victoryOverlay');
     el.querySelector('#victory-stats').innerHTML =
         `🏆 ${G.moves} moves &nbsp;|&nbsp; ⏱ ${document.getElementById('timeDisplay').textContent} &nbsp;|&nbsp; ⭐ ${G.score} pts`;
+
+    // Render extra victory info
+    if (typeof renderVictoryExtras === 'function') renderVictoryExtras();
+
     el.classList.add('active');
 }
 
@@ -91,9 +111,11 @@ function closeModal(id) { document.getElementById(id)?.classList.remove('active'
 // ── HINT ──────────────────────────────────────────────────────────────────────
 function showHint() {
     document.querySelectorAll('.hint-highlight').forEach(el => el.classList.remove('hint-highlight'));
-    const hint = findHint();
+
+    // Use deep hint for better suggestions
+    const hint = (typeof findDeepHint === 'function') ? findDeepHint() : findHint();
     if (!hint) {
-        showJokeBubble(getJoke('stuck'), 3000);
+        showCharacterBubble('stuck', getJoke('stuck'), 3000);
         return;
     }
     const addHL = (sel) => document.querySelector(sel)?.classList.add('hint-highlight');
@@ -108,13 +130,38 @@ function showHint() {
     }
     addHL(`#${hint.to}`);
     setTimeout(() => document.querySelectorAll('.hint-highlight').forEach(el => el.classList.remove('hint-highlight')), 2200);
-    showToast('💡 Try that highlighted card!');
+    showToast('Try that highlighted card!');
+}
+
+/**
+ * Use a hint token for a free hint. Returns true if token was spent.
+ */
+function useHintToken() {
+    if (typeof useToken === 'function' && hasToken('hint')) {
+        useToken('hint');
+        showHint();
+        if (typeof renderTokenBar === 'function') renderTokenBar();
+        return true;
+    }
+    return false;
+}
+
+// ── TOKEN UNDO ────────────────────────────────────────────────────────────────
+function useUndoToken() {
+    if (typeof useToken === 'function' && hasToken('undo')) {
+        useToken('undo');
+        if (undoMove()) {
+            fullRender();
+            onUndo();
+            showToast('Free undo used!');
+            if (typeof renderTokenBar === 'function') renderTokenBar();
+            return true;
+        }
+    }
+    return false;
 }
 
 // ── OVERRIDDEN DRAG.JS EVENTS (wired to joke system) ─────────────────────────
-// We patch onGlobalClick to integrate jokes — original onDrop in drag.js calls moveCards directly.
-// We intercept the result in setupEvents by decorating the key functions.
-
 function _onStockClick() {
     startTimer();
     const had = G.stock.length > 0 || G.waste.length > 0;
@@ -136,6 +183,19 @@ function _autoMoveToFoundation(cardEl, pileEl) {
             spawnFoundationBurst(`foundation-${i}`);
             if (card.value === 'K') onKingMove();
             onMilestone(G.moves);
+
+            // Check suit completion
+            if (typeof checkSuitComplete === 'function' && checkSuitComplete(i)) {
+                showCharacterBubble('suitComplete', getJoke('suitComplete'), 4000);
+                // Trigger a bonus hard quiz for suit completion
+                if (typeof checkMilestoneQuiz === 'function') {
+                    setTimeout(() => checkMilestoneQuiz(), 2000);
+                }
+            }
+
+            // Check milestone quiz triggers
+            if (typeof checkMilestoneQuiz === 'function') checkMilestoneQuiz();
+
             fullRender();
             saveGame();
             resetStockJoke();
@@ -154,9 +214,10 @@ function setupEvents() {
             stopTimer();
             newGame();
             resetJokeState();
+            if (typeof recordGameStart === 'function') recordGameStart();
             fullRender();
             saveGame();
-            showJokeBubble('New game! Good luck! 🍀', 2000);
+            showCharacterBubble('firstAce', 'New game! Good luck!', 2000);
         }
     });
 
@@ -179,20 +240,48 @@ function setupEvents() {
     document.getElementById('soundToggle').addEventListener('click', () => {
         CZ.soundEnabled = !CZ.soundEnabled;
         saveCZ();
-        showToast(CZ.soundEnabled ? 'Sound on 🔊' : 'Sound off 🔇');
+        showToast(CZ.soundEnabled ? 'Sound on' : 'Sound off');
     });
 
-    // New: Family Trivia Bonus
+    // Family Trivia Bonus (brain button)
     document.getElementById('nextMoveBtn').addEventListener('click', () => {
         startTimer();
-        openTriviaForHelp();
+        if (typeof openTriviaForHelp === 'function') {
+            openTriviaForHelp('easy', false);
+        }
         onMilestone(G.moves);
     });
 
-    // New: Auto-complete
+    // Auto-complete
     document.getElementById('autoCompleteBtn').addEventListener('click', () => {
         if (canAutoComplete()) autoComplete();
-        else showJokeBubble("Keep going! Almost ready to auto-complete! 🌟", 2500);
+        else showCharacterBubble('stuck', "Keep going! Almost ready to auto-complete!", 2500);
+    });
+
+    // Stats button
+    const statsBtn = document.getElementById('statsBtn');
+    if (statsBtn) {
+        statsBtn.addEventListener('click', () => {
+            if (typeof renderStatsModal === 'function') renderStatsModal();
+            openModal('statsModal');
+        });
+    }
+
+    // ── TOKEN BAR CLICKS ──
+    const tokenUndo = document.getElementById('token-undo');
+    if (tokenUndo) tokenUndo.addEventListener('click', () => useUndoToken());
+
+    const tokenHint = document.getElementById('token-hint');
+    if (tokenHint) tokenHint.addEventListener('click', () => useHintToken());
+
+    const tokenPeek = document.getElementById('token-peek');
+    if (tokenPeek) tokenPeek.addEventListener('click', () => {
+        if (typeof enterPeekMode === 'function') enterPeekMode();
+    });
+
+    const tokenWand = document.getElementById('token-wand');
+    if (tokenWand) tokenWand.addEventListener('click', () => {
+        if (typeof useWandToken === 'function') useWandToken();
     });
 
     // ── DRAG & DROP (from drag.js) ──
@@ -201,7 +290,6 @@ function setupEvents() {
     document.addEventListener('dragleave',  onDragLeave);
     document.addEventListener('dragend',    onDragEnd);
     document.addEventListener('drop', (e) => {
-        // Patch drop to trigger joke/effects
         e.preventDefault();
         document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target'));
         const pileEl = e.target.closest('.pile, .tableau-pile');
@@ -219,12 +307,18 @@ function setupEvents() {
                 const fi = parseInt(dest.split('-')[1]);
                 onFoundationPlace(fi);
                 spawnFoundationBurst(dest);
+
+                // Check suit completion
+                if (typeof checkSuitComplete === 'function' && checkSuitComplete(fi)) {
+                    showCharacterBubble('suitComplete', getJoke('suitComplete'), 4000);
+                }
+
+                // Milestone quiz
+                if (typeof checkMilestoneQuiz === 'function') checkMilestoneQuiz();
             }
             if (prevDrag.card.value === 'K') onKingMove();
-            // Was a face-down card revealed?
             if (dragSrc?.startsWith('tableau')) {
                 const pi = parseInt(dragSrc.split('-')[1]);
-                // If there's a newly face-up card, trigger flip joke
                 if (G.tableau[pi].length > 0 && G.tableau[pi][G.tableau[pi].length-1].faceUp) {
                     onCardFlip();
                 }
@@ -237,8 +331,26 @@ function setupEvents() {
         }
     });
 
-    // Click handler (stock + double-click auto-move)
+    // Click handler (stock + double-click auto-move + peek mode)
     document.addEventListener('click', (e) => {
+        // Peek mode: clicking a face-down card peeks at it
+        if (typeof isPeekMode === 'function' && isPeekMode()) {
+            const cardEl = e.target.closest('.card.face-down');
+            if (cardEl) {
+                const pileEl = cardEl.closest('[id^=tableau-]');
+                if (pileEl) {
+                    const tIdx = parseInt(pileEl.id.split('-')[1]);
+                    const cards = Array.from(pileEl.querySelectorAll('.card'));
+                    const cIdx = cards.indexOf(cardEl);
+                    if (typeof peekAtCard === 'function') peekAtCard(tIdx, cIdx);
+                    e.stopPropagation();
+                    return;
+                }
+            }
+            // Clicked something else while in peek mode -- cancel
+            if (typeof exitPeekMode === 'function') exitPeekMode();
+        }
+
         if (e.target.closest('#stock')) {
             _onStockClick();
             return;
@@ -302,8 +414,10 @@ function setupEvents() {
 
     // Victory
     document.getElementById('playAgainBtn').addEventListener('click', () => {
-        hideVictory(); stopTimer(); newGame(); resetJokeState(); fullRender(); saveGame();
-        showJokeBubble("Let's go again! 🚀", 2000);
+        hideVictory(); stopTimer(); newGame(); resetJokeState();
+        if (typeof recordGameStart === 'function') recordGameStart();
+        fullRender(); saveGame();
+        showCharacterBubble('firstAce', "Let's go again!", 2000);
     });
     document.getElementById('closeVictory').addEventListener('click', hideVictory);
 
@@ -315,16 +429,39 @@ function setupEvents() {
         }
         if (e.key === 'h' || e.key === 'H') showHint();
         if (e.key === ' ') { e.preventDefault(); startTimer(); _onStockClick(); }
-        if (e.key === 'Escape') { closeModal('customizeModal'); hideVictory(); }
+        if (e.key === 'Escape') {
+            closeModal('customizeModal');
+            closeModal('statsModal');
+            if (typeof closeTrivia === 'function') closeTrivia();
+            if (typeof closeBirthday === 'function') closeBirthday();
+            hideVictory();
+            if (typeof exitPeekMode === 'function') exitPeekMode();
+        }
+        // Q key for quick quiz
+        if (e.key === 'q' || e.key === 'Q') {
+            startTimer();
+            if (typeof openTriviaForHelp === 'function') openTriviaForHelp('easy', false);
+        }
     });
 }
 
 // ── BOOT ──────────────────────────────────────────────────────────────────────
 (function boot() {
     loadCZ();
-    if (!loadGame()) newGame();
+    if (!loadGame()) {
+        newGame();
+        if (typeof recordGameStart === 'function') recordGameStart();
+    }
     fullRender();
     setupEvents();
-    // Welcome joke after 1s
-    setTimeout(() => showJokeBubble("Welcome! Good luck, have fun! 🃏♥", 3000), 1000);
+
+    // Welcome message after 1s
+    setTimeout(() => showCharacterBubble('flip', 'Welcome! Good luck, have fun!', 3000), 1000);
+
+    // Birthday check after characters load (give it time to fetch roster.json)
+    setTimeout(() => {
+        if (typeof isBirthdayToday === 'function' && isBirthdayToday()) {
+            showBirthdayGreeting();
+        }
+    }, 2000);
 })();

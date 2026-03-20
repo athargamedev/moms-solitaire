@@ -23,31 +23,6 @@
     </div>
 
     <div class="header-center">
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mom's Solitaire ♥</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/cards.css">
-    <link rel="stylesheet" href="css/modal.css">
-    <link rel="stylesheet" href="css/animations.css">
-</head>
-<body class="theme-classic">
-
-<!-- ══════════════════════════════════════════════════════ HEADER ═══ -->
-<header class="header">
-    <div class="header-left">
-        <button class="btn btn-ghost btn-icon" id="soundToggle" title="Toggle Sound">🔊</button>
-        <button class="btn btn-primary" id="customizeBtn">✨ Customize</button>
-        <a href="admin.html" class="btn btn-ghost btn-icon" title="Manage Family Characters">👨‍👩‍👧‍👦</a>
-    </div>
-
-    <div class="header-center">
         <h1 class="header-title">Mom's <span>Solitaire</span></h1>
         <p class="header-subtitle">Klondike · Classic Edition</p>
     </div>
@@ -60,10 +35,45 @@
     </div>
 </header>
 
+<!-- ═══════════════════════════════════════════════ TOKEN BAR ═══ -->
+<div class="token-bar" id="tokenBar">
+    <div class="token-item" id="token-undo" title="Undo Tokens - Click to use a free undo">
+        <span class="token-icon">↩️</span>
+        <span class="token-count" id="token-undo-count">0</span>
+        <span class="token-label">Undo</span>
+    </div>
+    <div class="token-item" id="token-hint" title="Hint Tokens - Click to use a free hint">
+        <span class="token-icon">💡</span>
+        <span class="token-count" id="token-hint-count">0</span>
+        <span class="token-label">Hint</span>
+    </div>
+    <div class="token-item" id="token-peek" title="Peek Tokens - Click then click a face-down card to peek">
+        <span class="token-icon">👁</span>
+        <span class="token-count" id="token-peek-count">0</span>
+        <span class="token-label">Peek</span>
+    </div>
+    <div class="token-item" id="token-wand" title="Magic Wand - Auto-plays the best move">
+        <span class="token-icon">🪄</span>
+        <span class="token-count" id="token-wand-count">0</span>
+        <span class="token-label">Wand</span>
+    </div>
+    <div class="token-item token-multiplier" id="token-multiplier" title="Score Multiplier" style="display:none;">
+        <span class="token-icon">⚡</span>
+        <span class="token-count" id="token-multiplier-value">x2</span>
+        <span class="token-label" id="token-multiplier-moves">0 moves</span>
+    </div>
+    <div class="token-separator"></div>
+    <div class="token-item token-streak" id="token-streak" title="Quiz Streak">
+        <span class="token-icon">🔥</span>
+        <span class="token-count" id="token-streak-count">0</span>
+        <span class="token-label">Streak</span>
+    </div>
+</div>
+
 <!-- ═════════════════════════════════════════════════════ GAME AREA ═══ -->
 <main class="game-container">
 
-    <!-- Top row: Stock / Waste ←→ Foundations -->
+    <!-- Top row: Stock / Waste <-> Foundations -->
     <div class="top-row">
         <div class="stock-waste">
             <div class="pile stock-pile" id="stock">
@@ -126,12 +136,84 @@
             <span class="status-label">Score</span>
             <span class="status-value" id="scoreDisplay">350</span>
         </div>
+        <div class="status-item">
+            <button class="btn btn-ghost btn-icon" id="statsBtn" title="View Stats">📊</button>
+        </div>
         <!-- Auto-complete button (hidden until solvable) -->
         <button class="btn btn-primary" id="autoCompleteBtn" style="display:none;" title="Finish automatically!">
             🪄 Auto-Complete!
         </button>
     </div>
 </main>
+
+<!-- ═══════════════════════════════════════ FAMILY CHEER SQUAD ═══ -->
+<div class="cheer-squad" id="cheerSquad">
+    <div class="cheer-squad-inner" id="cheerSquadInner">
+        <!-- Populated dynamically by render.js -->
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════ BIRTHDAY OVERLAY ═══ -->
+<div class="modal-overlay" id="birthdayOverlay">
+    <div class="modal birthday-modal">
+        <div class="modal-header">
+            <h2 class="modal-title">🎂 Happy Birthday!</h2>
+            <button class="btn btn-ghost btn-icon" style="font-size:1.5rem" onclick="closeBirthday()">×</button>
+        </div>
+        <div class="modal-body" style="text-align:center; padding: 20px;">
+            <div id="birthdayAvatar" style="width:100px;height:100px;border-radius:50%;background:#ccc;margin:0 auto 15px;background-size:cover;background-position:center;border:4px solid #c9a55a;display:flex;align-items:center;justify-content:center;color:#fff;font-size:2.5rem;font-weight:bold;"></div>
+            <h3 id="birthdayName" style="margin-bottom:8px;"></h3>
+            <p id="birthdayMessage" style="font-size:1.1rem;line-height:1.5;margin-bottom:20px;"></p>
+            <button class="btn btn-primary" onclick="closeBirthday()">🎉 Let's Play!</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ STATS MODAL ═══ -->
+<div class="modal-overlay" id="statsModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title">📊 Game Statistics</h2>
+            <button class="modal-close" onclick="closeModal('statsModal')">×</button>
+        </div>
+        <div class="modal-content" style="padding:20px;">
+            <div class="stats-grid" id="statsGrid">
+                <div class="stats-card">
+                    <div class="stats-card-value" id="stat-games">0</div>
+                    <div class="stats-card-label">Games Played</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-value" id="stat-wins">0</div>
+                    <div class="stats-card-label">Games Won</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-value" id="stat-winrate">0%</div>
+                    <div class="stats-card-label">Win Rate</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-value" id="stat-best-time">--:--</div>
+                    <div class="stats-card-label">Best Time</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-value" id="stat-best-score">0</div>
+                    <div class="stats-card-label">Best Score</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-value" id="stat-quizzes">0/0</div>
+                    <div class="stats-card-label">Quizzes (Correct/Total)</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-value" id="stat-best-streak">0</div>
+                    <div class="stats-card-label">Best Quiz Streak</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-card-value" id="stat-tokens-earned">0</div>
+                    <div class="stats-card-label">Tokens Earned</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- ═══════════════════════════════════════════ CUSTOMIZE MODAL ═══ -->
 <div class="modal-overlay" id="customizeModal">
@@ -252,19 +334,24 @@
 
 <!-- ════════════════════════════════════════════ TRIVIA OVERLAY ═══ -->
 <div class="modal-overlay" id="triviaOverlay">
-    <div class="modal-content" style="max-width: 400px; text-align: center;">
+    <div class="modal trivia-modal" style="max-width: 420px;">
         <div class="modal-header">
             <h2 class="modal-title">🧠 Family Trivia!</h2>
             <button class="btn btn-ghost btn-icon" style="font-size:1.5rem" onclick="closeTrivia()">×</button>
         </div>
-        <div class="modal-body" style="padding-top:10px;">
-            <div id="triviaAvatar" style="width:80px;height:80px;border-radius:50%;background:#ccc;margin:0 auto 15px;background-size:cover;background-position:center;border:3px solid var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:2rem;font-weight:bold;"></div>
-            <div style="font-weight:600;font-size:1.1rem;margin-bottom:8px" id="triviaName">Name</div>
-            <p id="triviaQuestion" style="margin-bottom:20px;font-size:1.05rem;line-height:1.4;">Question?</p>
+        <div class="modal-body" style="text-align:center; padding: 15px 20px;">
+            <div id="triviaAvatar" style="width:80px;height:80px;border-radius:50%;background:#ccc;margin:0 auto 12px;background-size:cover;background-position:center;border:3px solid var(--primary, #c9a55a);display:flex;align-items:center;justify-content:center;color:#fff;font-size:2rem;font-weight:bold;"></div>
+            <div style="font-weight:600;font-size:1.1rem;margin-bottom:4px" id="triviaName">Name</div>
+            <div class="trivia-difficulty-badge" id="triviaDifficulty">Easy</div>
+            <div class="trivia-timer-bar" id="triviaTimerBar">
+                <div class="trivia-timer-fill" id="triviaTimerFill"></div>
+            </div>
+            <p id="triviaQuestion" style="margin-bottom:16px;font-size:1.05rem;line-height:1.4;">Question?</p>
             <div id="triviaOptions" style="display:flex;flex-direction:column;gap:10px;">
                 <!-- generated options -->
             </div>
-            <div id="triviaFeedback" style="margin-top:15px;font-weight:600;min-height:24px;"></div>
+            <div id="triviaReward" class="trivia-reward" style="display:none;"></div>
+            <div id="triviaFeedback" class="trivia-feedback" style="margin-top:12px;font-weight:600;min-height:24px;"></div>
         </div>
     </div>
 </div>
@@ -275,11 +362,20 @@
         <div class="victory-emoji">🎉</div>
         <h2 class="victory-title">You Won!</h2>
         <p class="victory-stats" id="victory-stats"></p>
+        <div class="victory-quiz-stats" id="victory-quiz-stats"></div>
+        <div class="victory-tokens" id="victory-tokens"></div>
+        <div class="victory-family-cheers" id="victory-family-cheers"></div>
         <div class="victory-buttons">
             <button class="btn btn-primary" id="playAgainBtn">🔄 Play Again</button>
             <button class="btn btn-ghost"   id="closeVictory">Close</button>
         </div>
     </div>
+</div>
+
+<!-- Peek overlay (appears when peeking at face-down card) -->
+<div class="peek-overlay" id="peekOverlay" style="display:none;">
+    <div class="peek-card" id="peekCard"></div>
+    <div class="peek-timer">Peeking... 2s</div>
 </div>
 
 <!-- Toast notification -->
@@ -291,6 +387,7 @@
 <script src="js/sounds.js"></script>
 <script src="js/jokes.js"></script>
 <script src="js/characters.js"></script>
+<script src="js/tokens.js"></script>
 <script src="js/autoplay.js"></script>
 <script src="js/quizzes.js"></script>
 <script src="js/render.js"></script>
