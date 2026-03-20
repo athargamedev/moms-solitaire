@@ -47,17 +47,21 @@ function newGame() {
     undoStack.length = 0;
     G = createInitialState();
 
-    const deck = shuffle(buildDeck());
+    const deck = buildDeck();
+    shuffle(deck);
     let idx = 0;
 
-    // Deal tableau: pile i gets i+1 cards, last is face-up
-    for (let i = 0; i < 7; i++) {
-        for (let j = i; j < 7; j++) {
+    // Deal tableau: Pile i (0-6) gets i+1 cards
+    for (let tIdx = 0; tIdx < 7; tIdx++) {
+        for (let count = 0; count < tIdx + 1; count++) {
             const card = deck[idx++];
-            card.faceUp = (j === i);
-            G.tableau[j].push(card);
+            // Only the last card in the pile is face-up
+            card.faceUp = (count === tIdx);
+            G.tableau[tIdx].push(card);
         }
     }
+    
+    // Remaining cards go into the stock
     G.stock = deck.slice(idx);
 }
 
@@ -246,32 +250,63 @@ function isPlayerStuck() {
 
 // ── HINT ──────────────────────────────────────────────────────────────────────
 function findHint() {
-    // Waste -> foundation
-    if (G.waste.length > 0) {
-        const c = G.waste[G.waste.length - 1];
-        for (let i = 0; i < 4; i++) {
-            if (canPlaceOnFoundation(c, i)) return { from: 'waste', to: `foundation-${i}`, card: c };
+    const allMoves = getAllValidMoves();
+    if (allMoves.length === 0) return null;
+
+    // Rank moves by quality
+    const scoredMoves = allMoves.map(move => {
+        let score = 0;
+
+        // HIGH PRIORITY: Move to foundation
+        if (move.to.startsWith('foundation')) {
+            score += 1000;
         }
-        for (let i = 0; i < 7; i++) {
-            if (canPlaceOnTableau(c, i)) return { from: 'waste', to: `tableau-${i}`, card: c };
+
+        // MEDIUM PRIORITY: Flipping a facedown card
+        if (move.from.startsWith('tableau')) {
+            const pileIdx = parseInt(move.from.split('-')[1]);
+            const pile = G.tableau[pileIdx];
+            // If this is the only face-up card and there is a face-down card below it
+            if (pile.length > 1 && pile.filter(c => c.faceUp).length === 1) {
+                const bottomFaceUpIdx = pile.findIndex(c => c.faceUp);
+                if (bottomFaceUpIdx > 0 && !pile[bottomFaceUpIdx - 1].faceUp) {
+                    score += 500;
+                }
+            }
         }
-    }
-    // Tableau -> foundation or better tableau
-    for (let i = 0; i < 7; i++) {
-        const pile = G.tableau[i];
-        if (pile.length === 0) continue;
-        const faceUp = pile.filter(c => c.faceUp);
-        if (faceUp.length === 0) continue;
-        const top = faceUp[faceUp.length - 1];
-        for (let j = 0; j < 4; j++) {
-            if (canPlaceOnFoundation(top, j)) return { from: `tableau-${i}`, to: `foundation-${j}`, card: top };
+
+        // LOW PRIORITY: Removing from waste (to keep tableau clear)
+        if (move.from === 'waste') {
+            score += 100;
         }
-        for (let j = 0; j < 7; j++) {
-            if (j === i) continue;
-            if (canPlaceOnTableau(faceUp[0], j)) return { from: `tableau-${i}`, to: `tableau-${j}`, card: faceUp[0] };
+
+        // AVOIDANCE: Moving a card from one column to another if both are already face-up 
+        // and it doesn't reveal any new information/cards.
+        if (move.from.startsWith('tableau') && move.to.startsWith('tableau')) {
+            const fromIdx = parseInt(move.from.split('-')[1]);
+            const fromPile = G.tableau[fromIdx];
+            const faceUpInFrom = fromPile.filter(c => c.faceUp);
+            // If the move doesn't uncover a face-down card
+            if (faceUpInFrom.length === fromPile.length) {
+                score -= 200;
+            }
         }
-    }
-    return null;
+
+        // Prefer larger stacks
+        if (move.from.startsWith('tableau')) {
+            const fromIdx = parseInt(move.from.split('-')[1]);
+            score += G.tableau[fromIdx].length;
+        }
+
+        return { ...move, score };
+    });
+
+    // Sort by score descending
+    scoredMoves.sort((a,b) => b.score - a.score);
+
+    // Filter out moves that are clearly negative (useless swapping)
+    const best = scoredMoves[0];
+    return best.score > -100 ? best : null;
 }
 
 /**

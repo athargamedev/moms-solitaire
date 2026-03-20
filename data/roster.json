@@ -1,29 +1,55 @@
 [
   {
     "id": "e470d031-5631-41fb-b1d5-657732a5dfce",
-    "name": "Brother",
+    "name": "Raimundo",
     "relation": "Brother",
     "avatar": "data:image/jpeg;base64,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",
     "color": "#c9a55a",
     "personality": "sweet",
+    "birthday": null,
+    "birthYear": null,
+    "birthdayGreeting": null,
+    "hometown": null,
+    "workplace": null,
+    "education": null,
+    "funFact": null,
     "messages": {
-      "win": "I knew you could do it!",
-      "firstAce": "Great start!",
-      "suitComplete": "One down, three to go!",
-      "stockSpam": "Take your time, look closely.",
-      "milestone25": "You are on a roll!",
-      "flip": "Nice move!",
-      "kingMove": "The King has arrived!",
-      "undo": "Changed your mind? That works too.",
-      "foundation": "Getting closer!"
+      "stockSpam": [
+        "Take your time, look closely."
+      ],
+      "foundation": [
+        "Getting closer!"
+      ],
+      "firstAce": [
+        "Great start!"
+      ],
+      "suitComplete": [
+        "One down, three to go!"
+      ],
+      "flip": [
+        "Nice move!"
+      ],
+      "kingMove": [
+        "The King has arrived!"
+      ],
+      "undo": [
+        "Changed your mind? That works too."
+      ],
+      "win": [
+        "I knew you could do it!"
+      ],
+      "milestone25": [
+        "You are on a roll!"
+      ]
     },
+    "quizzes": [],
     "activeEvents": [
-      "win",
+      "stockSpam",
       "firstAce",
       "suitComplete",
-      "stockSpam",
       "flip",
-      "kingMove"
+      "kingMove",
+      "win"
     ],
     "createdAt": 1773972588733
   },
@@ -141,29 +167,60 @@
   },
   {
     "id": "a0626a74-386e-4977-adb7-a39a4be231ad",
-    "name": "Filho",
+    "name": "Andre",
     "relation": "Filho",
     "avatar": "data:image/jpeg;base64,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",
     "color": "#c9a55a",
     "personality": "sweet",
+    "birthday": "29/07",
+    "birthYear": "1981",
+    "birthdayGreeting": null,
+    "hometown": null,
+    "workplace": null,
+    "education": null,
+    "funFact": null,
     "messages": {
-      "win": "I knew you could do it!",
-      "firstAce": "Great start!",
-      "suitComplete": "One down, three to go!",
-      "stockSpam": "Take your time, look closely.",
-      "milestone25": "You are on a roll!",
-      "flip": "Nice move!",
-      "kingMove": "The King has arrived!",
-      "undo": "Changed your mind? That works too.",
-      "foundation": "Getting closer!"
+      "stockSpam": [
+        "Take your time, look closely."
+      ],
+      "foundation": [
+        "Getting closer!"
+      ],
+      "firstAce": [
+        "Great start!"
+      ],
+      "suitComplete": [
+        "One down, three to go!"
+      ],
+      "flip": [
+        "Nice move!"
+      ],
+      "kingMove": [
+        "The King has arrived!"
+      ],
+      "undo": [
+        "Changed your mind? That works too."
+      ],
+      "win": [
+        "I knew you could do it!"
+      ],
+      "milestone25": [
+        "You are on a roll!"
+      ]
     },
+    "quizzes": [
+      {
+        "question": "Qual ThunderCats eu mais gostava?",
+        "answer": "Tiger"
+      }
+    ],
     "activeEvents": [
-      "win",
+      "stockSpam",
       "firstAce",
       "suitComplete",
-      "stockSpam",
       "flip",
-      "kingMove"
+      "kingMove",
+      "win"
     ],
     "createdAt": 1773972620570
   }

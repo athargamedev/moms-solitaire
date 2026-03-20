@@ -209,17 +209,22 @@ function _autoMoveToFoundation(cardEl, pileEl) {
 // ── WIRE UP EVENTS ────────────────────────────────────────────────────────────
 function setupEvents() {
     // Header buttons
-    document.getElementById('newGameBtn').addEventListener('click', () => {
-        if (confirm('Start a new game?')) {
-            stopTimer();
-            newGame();
-            resetJokeState();
-            if (typeof recordGameStart === 'function') recordGameStart();
-            fullRender();
-            saveGame();
-            showCharacterBubble('firstAce', 'New game! Good luck!', 2000);
-        }
-    });
+    const newGameBtn = document.getElementById('newGameBtn');
+    if (newGameBtn) {
+        newGameBtn.addEventListener('click', () => {
+            if (confirm('Nova partida? Todo o progresso atual sera perdido.')) {
+                hideVictory();
+                stopTimer();
+                newGame();
+                resetJokeState();
+                if (typeof recordGameStart === 'function') recordGameStart();
+                fullRender();
+                saveGame();
+                // Pick a fresh character to welcome Mom
+                showCharacterBubble('flip', "Nova partida! Boa sorte, Mae!", 3000);
+            }
+        });
+    }
 
     document.getElementById('undoBtn').addEventListener('click', () => {
         if (undoMove()) {
@@ -257,6 +262,7 @@ function setupEvents() {
         if (canAutoComplete()) autoComplete();
         else showCharacterBubble('stuck', "Keep going! Almost ready to auto-complete!", 2500);
     });
+
 
     // Stats button
     const statsBtn = document.getElementById('statsBtn');

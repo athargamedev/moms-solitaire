@@ -251,7 +251,7 @@ function activateTimeFreeze() {
 
 // ── QUIZ COOLDOWN ─────────────────────────────────────────────────────────────
 let _lastQuizTime = 0;
-const QUIZ_COOLDOWN_MS = 45000; // 45 seconds between voluntary quizzes
+const QUIZ_COOLDOWN_MS = 5000; // 5 seconds between voluntary quizzes
 
 function canTriggerQuiz() {
     return Date.now() - _lastQuizTime >= QUIZ_COOLDOWN_MS;

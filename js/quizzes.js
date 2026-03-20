@@ -19,7 +19,8 @@ function getAllQuizzes() {
     const quizzes = [];
 
     // 1. Character-based quizzes (from roster)
-    (_characters || []).forEach(c => {
+    const roster = typeof getCharacters === 'function' ? getCharacters() : [];
+    roster.forEach(c => {
         if (c.quizzes && c.quizzes.length > 0) {
             c.quizzes.forEach(q => {
                 quizzes.push({
@@ -37,8 +38,8 @@ function getAllQuizzes() {
     });
 
     // 2. Auto-generate relationship quizzes from roster data
-    const chars = _characters || [];
-    if (chars.length >= 2) {
+    const chars = roster;
+    if (chars.length >= 1) {
         chars.forEach(c => {
             if (c.relation) {
                 quizzes.push({

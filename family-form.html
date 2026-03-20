@@ -1,444 +1,394 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mom's Solitaire -- Join the Game!</title>
+    <title>Participar do Jogo da Mamãe! ❤️</title>
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #c9a55a;
+            --primary-light: #e0bc78;
+            --secondary: #b85c5c;
+            --bg: #0f1a1a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --text: #f0ebe0;
+            --text-muted: #a0a0a0;
+            --border: rgba(255, 255, 255, 0.1);
+            --success: #6b9b7a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-            background-color: var(--bg-felt);
-        }
-        
-        .invite-container {
-            background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-            backdrop-filter: blur(15px);
-            border: 1.5px solid rgba(201,165,90,0.3);
-            border-radius: 24px;
-            padding: 40px;
-            max-width: 640px;
-            width: 100%;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-        }
-
-        .header-msg {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .header-msg h1 {
-            font-family: 'Playfair Display', serif;
-            color: var(--accent-gold);
-            font-size: 2.2rem;
-            margin-bottom: 10px;
-        }
-
-        .header-msg p {
-            color: var(--text-light);
-            opacity: 0.85;
-            font-size: 1.05rem;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
             line-height: 1.6;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(201, 165, 90, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(184, 92, 92, 0.05) 0%, transparent 40%);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            align-items: center;
+            padding: 20px;
         }
 
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-        }
-
-        .form-group label {
-            font-weight: 600;
-            color: var(--accent-gold-light);
-            text-transform: uppercase;
-            font-size: 0.78rem;
-            letter-spacing: 0.05em;
-        }
-
-        .form-group .hint {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            margin-top: -2px;
-        }
-
-        .form-control {
-            padding: 14px;
-            border-radius: 12px;
-            background: rgba(0,0,0,0.25);
-            border: 1px solid rgba(255,255,255,0.15);
-            color: white;
-            font-family: 'Source Sans 3', sans-serif;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--accent-gold);
-        }
-
-        textarea.form-control {
-            resize: vertical;
-            min-height: 70px;
-        }
-
-        .file-upload {
-            background: rgba(0,0,0,0.2);
-            padding: 30px;
-            border: 2px dashed rgba(255,255,255,0.2);
-            border-radius: 12px;
-            text-align: center;
-            color: var(--text-light);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .file-upload:hover {
-            border-color: var(--accent-gold);
-            background: rgba(201,165,90,0.05);
-        }
-
-        .photo-preview {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid var(--accent-gold);
-            display: none;
-            margin: 10px auto;
-        }
-
-        .btn-submit {
-            background: linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold));
-            color: #2c1f00;
-            font-weight: bold;
-            font-size: 1.1rem;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
+        .container {
+            max-width: 600px;
             width: 100%;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(201,165,90,0.3);
+            margin: 40px auto;
         }
 
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(201,165,90,0.5);
+        header {
+            text-align: center;
+            margin-bottom: 40px;
         }
 
-        .btn-submit:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+
+        /* ── FORM CARD ── */
+        .form-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
 
         .section-title {
-            font-family: 'Playfair Display', serif;
-            color: white;
-            font-size: 1.3rem;
-            margin: 28px 0 14px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 8px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary-light);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
         }
 
-        .secret-box {
-            background: rgba(201,165,90,0.08);
-            border: 1px solid rgba(201,165,90,0.25);
-            border-radius: 12px;
-            padding: 16px;
-            margin-top: 6px;
+        /* ── INPUTS ── */
+        .input-group {
+            margin-bottom: 25px;
         }
 
-        .secret-box label {
-            color: #f9d97a !important;
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-muted);
         }
 
-        .success-msg {
+        input[type="text"], 
+        textarea, 
+        select {
+            width: 100%;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 15px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(0,0,0,0.4);
+            box-shadow: 0 0 0 3px rgba(201, 165, 90, 0.1);
+        }
+
+        /* ── PHOTO UPLOAD ── */
+        #photoUploadArea {
+            border: 2px dashed var(--border);
+            border-radius: 15px;
+            padding: 20px;
             text-align: center;
-            padding: 40px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255,255,255,0.02);
+            position: relative;
+            overflow: hidden;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #photoUploadArea:hover {
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.05);
+        }
+
+        #photoUploadArea.has-img {
+            border-style: solid;
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        #previewImg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
             display: none;
         }
 
-        .success-msg h2 {
-            font-family: 'Playfair Display', serif;
-            color: var(--accent-gold);
-            font-size: 2rem;
-            margin-bottom: 12px;
-        }
-
-        .success-msg p {
-            color: var(--text-light);
+        /* ── BUTTONS ── */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-family: inherit;
             font-size: 1.1rem;
-            line-height: 1.6;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        @media (max-width: 500px) {
-            .form-row { grid-template-columns: 1fr; }
-            .invite-container { padding: 24px; }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #8a6d2f);
+            color: #000;
+            box-shadow: 0 4px 15px rgba(201, 165, 90, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(201, 165, 90, 0.4);
+        }
+
+        .btn-primary:active { transform: translateY(0); }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ── SUCCESS STATE ── */
+        #successState {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .success-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            display: block;
+            animation: bounce 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+
+        /* ── TRIVIA HELPERS ── */
+        .trivia-tip {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 480px) {
+            h1 { font-size: 2rem; }
+            .form-card { padding: 20px; }
         }
     </style>
 </head>
-<body class="theme-classic">
+<body>
 
-    <div class="invite-container">
-        <div class="header-msg">
-            <h1>Mom's Solitaire Surprise!</h1>
-            <p>We are creating a personalized Solitaire game for Mom. Fill this out so your face, messages, and surprises pop up while she plays!</p>
-        </div>
+<div class="container">
+    <header>
+        <h1>Oi Família! ❤️</h1>
+        <p class="subtitle">Andre criando um jogo especial para a Mamãe.<br>Coloque suas informações abaixo para aparecer para ela!</p>
+    </header>
 
-        <form id="familyForm">
-            
-            <div class="section-title">1. Who are you?</div>
+    <div id="formContainer">
+        <div class="form-card">
+            <div id="errorMsg" style="color:var(--secondary); font-size: 0.9rem; margin-bottom: 15px; display:none;"></div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="name">Your Name *</label>
-                    <input type="text" id="name" class="form-control" placeholder="e.g. Andre" required maxlength="30">
+            <form id="familyForm">
+                <!-- Session 1: Basics -->
+                <div class="section-title">👤 Quem é você?</div>
+                <div class="input-group">
+                    <label for="fName">Seu Nome</label>
+                    <input type="text" id="fName" name="name" placeholder="Ex: Lucas, Andre, Maria..." required>
                 </div>
-                <div class="form-group">
-                    <label for="relation">Relation to Mom *</label>
-                    <input type="text" id="relation" class="form-control" placeholder="e.g. Son, Brother, Niece" required maxlength="30">
+                
+                <div class="input-group">
+                    <label for="fRelation">Grau de Parentesco</label>
+                    <input type="text" id="fRelation" name="relation" placeholder="Ex: Neto, Primo, Irmão..." required>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label>Upload a Photo of Yourself *</label>
-                <div class="file-upload" id="photoDrop">Click or drag a photo here (JPG/PNG, max 6MB)</div>
-                <input type="file" id="photoInput" accept="image/*" style="display:none" required>
-                <img class="photo-preview" id="photoPreview">
-            </div>
-
-            <div class="section-title">2. Your Personal Info</div>
-            <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:14px;">This info becomes trivia quiz questions during the game. Mom earns rewards when she answers correctly!</p>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="birthday">Your Birthday</label>
-                    <input type="text" id="birthday" class="form-control" placeholder="e.g. 14 de maio" maxlength="40">
-                    <span class="hint">Format: "14 de maio" or "May 14"</span>
+                <!-- Session 2: Photo -->
+                <div class="section-title">📸 Sua Foto</div>
+                <div class="input-group">
+                    <label>Escolha uma foto bem bonita para os cartões</label>
+                    <div id="photoUploadArea">
+                        <span class="upload-icon">🖼️</span>
+                        <span id="uploadText">Toque para escolher foto</span>
+                        <img id="previewImg" alt="Preview">
+                        <input type="file" id="photoInput" accept="image/*" style="display:none">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="birthYear">Birth Year</label>
-                    <input type="text" id="birthYear" class="form-control" placeholder="e.g. 1995" maxlength="4">
+
+                <!-- Session 3: Message -->
+                <div class="section-title">💌 Recadinho para a Mamãe</div>
+                <div class="input-group">
+                    <label for="fMessage">Escreva algo carinhoso (aparecerá quando ela jogar!)</label>
+                    <textarea id="fMessage" name="message" rows="3" placeholder="Ex: Te amo vovó! Boa sorte no jogo!"></textarea>
                 </div>
-            </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="hometown">Hometown</label>
-                    <input type="text" id="hometown" class="form-control" placeholder="e.g. Belem" maxlength="60">
+                <!-- Session 4: Trivia -->
+                <div class="section-title">🧠 Desafio para ela</div>
+                <div class="input-group">
+                    <label for="fQuizQ">Crie uma pergunta de trivia sobre você</label>
+                    <input type="text" id="fQuizQ" placeholder="Ex: Em que ano eu me formei?">
+                    <p class="trivia-tip">Ela ganhará bônus de "cheat" se acertar!</p>
                 </div>
-                <div class="form-group">
-                    <label for="workplace">Where You Work</label>
-                    <input type="text" id="workplace" class="form-control" placeholder="e.g. Hospital Santa Casa" maxlength="80">
+                <div class="input-group">
+                    <label for="fQuizA">Qual é a resposta correta?</label>
+                    <input type="text" id="fQuizA" placeholder="Ex: 2020">
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label for="education">Where You Studied</label>
-                <input type="text" id="education" class="form-control" placeholder="e.g. UFPA" maxlength="80">
-            </div>
-
-            <div class="form-group">
-                <label for="funFact">Fun Fact About You</label>
-                <input type="text" id="funFact" class="form-control" placeholder="e.g. I can cook the best feijoada!" maxlength="120">
-                <span class="hint">Something funny or interesting Mom would know about you</span>
-            </div>
-
-            <div class="section-title">3. Messages for Mom</div>
-            <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:14px;">Your face will pop up with these messages during the game!</p>
-
-            <div class="form-group">
-                <label for="winMsg">When she WINS the game</label>
-                <textarea id="winMsg" class="form-control" placeholder="e.g. GANHOU! Eu sabia que voce conseguia! Te amo!"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="aceMsg">When she places an ACE</label>
-                <textarea id="aceMsg" class="form-control" placeholder="e.g. Primeiro As! Agora vai, Mae!"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="jokeMsg">A random joke or greeting</label>
-                <textarea id="jokeMsg" class="form-control" placeholder="e.g. Mae, para de jogar e vai cozinhar!"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="birthdayGreeting">Birthday Greeting for Mom</label>
-                <textarea id="birthdayGreeting" class="form-control" placeholder="e.g. Feliz aniversario, Mae querida! Te amo demais!"></textarea>
-                <span class="hint">This pops up on Mom's birthday when she opens the game</span>
-            </div>
-
-            <div class="section-title">4. Secret Message (Special Reward!)</div>
-
-            <div class="secret-box">
-                <p style="color:var(--text-light);font-size:0.9rem;margin-bottom:12px;">
-                    Write a secret message that Mom can ONLY read when she answers a quiz about you correctly. 
-                    It is like a hidden treasure in the game!
-                </p>
-                <div class="form-group">
-                    <label for="secretMessage">Your Secret Message</label>
-                    <textarea id="secretMessage" class="form-control" placeholder="e.g. Mae, obrigado por tudo. Voce e a melhor mae do mundo. Eu te amo mais do que voce imagina!"></textarea>
-                    <span class="hint">Only revealed when Mom answers a trivia question about you correctly</span>
+                <div style="margin-top: 40px;">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <span>✨ Enviar para o Jogo</span>
+                    </button>
                 </div>
-            </div>
-
-            <div class="section-title">5. Custom Trivia Quiz</div>
-            <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:14px;">Ask Mom a question about yourself! If she gets it right, she earns a reward and unlocks your secret message.</p>
-
-            <div class="form-group">
-                <label for="quizQ">Your Question for Mom</label>
-                <input type="text" id="quizQ" class="form-control" placeholder="e.g. Em que ano eu me formei?">
-            </div>
-
-            <div class="form-group">
-                <label for="quizA">The Correct Answer</label>
-                <input type="text" id="quizA" class="form-control" placeholder="e.g. 2018">
-            </div>
-
-            <button type="submit" class="btn-submit" id="submitBtn">Send to the Game!</button>
-        </form>
-
-        <div class="success-msg" id="successMsg">
-            <h2>Sent!</h2>
-            <p>Your info has been added to Mom's Solitaire game. She is going to love it! Thank you for being part of this surprise.</p>
+            </form>
         </div>
     </div>
 
+    <!-- Success View -->
+    <div id="successState">
+        <span class="success-icon">💖</span>
+        <h2>Tudo pronto!</h2>
+        <p style="margin-top:15px; color: var(--text-muted);">Suas informações foram enviadas.<br>Na próxima vez que ela abrir o Solitaire, você estará lá torcendo por ela!</p>
+        <button class="btn btn-ghost" style="margin-top:30px; border:1px solid var(--border); color:var(--text)" onclick="location.reload()">Enviar mais um?</button>
+    </div>
+</div>
+
 <script>
-// Photo upload
-const photoDrop = document.getElementById('photoDrop');
-const photoInput = document.getElementById('photoInput');
-const photoPreview = document.getElementById('photoPreview');
-let photoBase64 = null;
+    const photoArea = document.getElementById('photoUploadArea');
+    const photoInput = document.getElementById('photoInput');
+    const previewImg = document.getElementById('previewImg');
+    const uploadText = document.getElementById('uploadText');
+    const form = document.getElementById('familyForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    let base64Photo = null;
 
-photoDrop.addEventListener('click', () => photoInput.click());
-photoDrop.addEventListener('dragover', e => { e.preventDefault(); photoDrop.style.borderColor = 'var(--accent-gold)'; });
-photoDrop.addEventListener('dragleave', () => { photoDrop.style.borderColor = 'rgba(255,255,255,0.2)'; });
-photoDrop.addEventListener('drop', e => {
-    e.preventDefault();
-    photoDrop.style.borderColor = 'rgba(255,255,255,0.2)';
-    handlePhoto(e.dataTransfer.files[0]);
-});
-photoInput.addEventListener('change', e => handlePhoto(e.target.files[0]));
+    // Handle Image upload
+    photoArea.onclick = () => photoInput.click();
+    photoInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
 
-function handlePhoto(file) {
-    if (!file || !file.type.startsWith('image/')) return;
-    if (file.size > 6 * 1024 * 1024) { alert('Image too large (max 6MB)'); return; }
-    const reader = new FileReader();
-    reader.onload = e => {
-        photoBase64 = e.target.result;
-        photoPreview.src = photoBase64;
-        photoPreview.style.display = 'block';
-        photoDrop.textContent = file.name;
-    };
-    reader.readAsDataURL(file);
-}
-
-// Form submit
-document.getElementById('familyForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.textContent = 'Sending...';
-
-    const name = document.getElementById('name').value.trim();
-    const relation = document.getElementById('relation').value.trim();
-
-    if (!name || !relation) { alert('Name and relation are required'); btn.disabled = false; btn.textContent = 'Send to the Game!'; return; }
-
-    // Build quizzes array from the personal info + custom quiz
-    const quizzes = [];
-    const birthday = document.getElementById('birthday').value.trim();
-    const birthYear = document.getElementById('birthYear').value.trim();
-    const hometown = document.getElementById('hometown').value.trim();
-    const workplace = document.getElementById('workplace').value.trim();
-    const education = document.getElementById('education').value.trim();
-
-    if (birthday) quizzes.push({ question: `Quando e o aniversario de ${name}?`, answer: birthday, category: 'birthday', difficulty: 'easy' });
-    if (birthYear) quizzes.push({ question: `Em que ano ${name} nasceu?`, answer: birthYear, category: 'birthday', difficulty: 'medium' });
-    if (hometown) quizzes.push({ question: `De onde e ${name}?`, answer: hometown, category: 'hometown', difficulty: 'medium' });
-    if (workplace) quizzes.push({ question: `Onde ${name} trabalha?`, answer: workplace, category: 'work', difficulty: 'medium' });
-    if (education) quizzes.push({ question: `Onde ${name} estudou?`, answer: education, category: 'education', difficulty: 'hard' });
-
-    const quizQ = document.getElementById('quizQ').value.trim();
-    const quizA = document.getElementById('quizA').value.trim();
-    if (quizQ && quizA) quizzes.push({ question: quizQ, answer: quizA, category: 'custom', difficulty: 'medium' });
-
-    // Build messages
-    const messages = {};
-    const winMsg = document.getElementById('winMsg').value.trim();
-    const aceMsg = document.getElementById('aceMsg').value.trim();
-    const jokeMsg = document.getElementById('jokeMsg').value.trim();
-    if (winMsg) messages.win = [winMsg];
-    if (aceMsg) messages.firstAce = [aceMsg];
-    if (jokeMsg) messages.foundation = [jokeMsg];
-
-    const character = {
-        id: crypto.randomUUID ? crypto.randomUUID() : 'ff' + Date.now().toString(36),
-        name: name,
-        relation: relation,
-        avatar: photoBase64 || null,
-        color: '#c9a55a',
-        personality: 'sweet',
-        birthday: birthday || null,
-        birthYear: birthYear || null,
-        birthdayGreeting: document.getElementById('birthdayGreeting').value.trim() || null,
-        hometown: hometown || null,
-        workplace: workplace || null,
-        education: education || null,
-        funFact: document.getElementById('funFact').value.trim() || null,
-        secretMessage: document.getElementById('secretMessage').value.trim() || null,
-        messages: messages,
-        quizzes: quizzes,
-        activeEvents: ['win', 'firstAce', 'suitComplete', 'stockSpam', 'flip', 'kingMove', 'foundation'],
-        createdAt: Date.now()
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            base64Photo = event.target.result;
+            previewImg.src = base64Photo;
+            previewImg.style.display = 'block';
+            uploadText.style.display = 'none';
+            photoArea.classList.add('has-img');
+        };
+        reader.readAsDataURL(file);
     };
 
-    try {
-        // Try sending to the local server
-        const res = await fetch('/api/family-submit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(character)
-        });
-
-        if (res.ok) {
-            document.getElementById('familyForm').style.display = 'none';
-            document.getElementById('successMsg').style.display = 'block';
-        } else {
-            throw new Error('Server error');
+    // Handle Form Submit
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        
+        if (!base64Photo) {
+            alert('Por favor, escolha uma foto! ❤️');
+            return;
         }
-    } catch(err) {
-        // Fallback: download as JSON file
-        const blob = new Blob([JSON.stringify(character, null, 2)], { type: 'application/json' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `${name.toLowerCase().replace(/\s/g, '-')}-character.json`;
-        a.click();
-        alert('Server not available. The data was downloaded as a JSON file. Send it to Andre so he can add you to the game!');
-        document.getElementById('familyForm').style.display = 'none';
-        document.getElementById('successMsg').style.display = 'block';
-    }
 
-    btn.disabled = false;
-    btn.textContent = 'Send to the Game!';
-});
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>🚀 Enviando...</span>';
+
+        const name = document.getElementById('fName').value.trim();
+        const relation = document.getElementById('fRelation').value.trim();
+        const message = document.getElementById('fMessage').value.trim();
+        const quizQ = document.getElementById('fQuizQ').value.trim();
+        const quizA = document.getElementById('fQuizA').value.trim();
+
+        // Construct the character object matching the schema
+        const character = {
+            id: 'REQ-' + Date.now(),
+            name: name,
+            relation: relation,
+            avatar: base64Photo,
+            color: '#c9a55a',
+            personality: 'sweet',
+            messages: {
+                win: [message || 'Boa, Mamãe!'],
+                foundation: [message || 'Isso aí!'],
+                firstAce: ['Uhul! Primeiro Ás!'],
+                flip: ['Boa jogada!'],
+                kingMove: ['O Rei chegou!']
+            },
+            quizzes: (quizQ && quizA) ? [{ question: quizQ, answer: quizA }] : [],
+            activeEvents: ['win', 'foundation', 'firstAce', 'flip', 'kingMove'],
+            createdAt: Date.now()
+        };
+
+        try {
+            const response = await fetch('/api/family-submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(character)
+            });
+
+            if (response.ok) {
+                document.getElementById('formContainer').style.display = 'none';
+                document.getElementById('successState').style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                throw new Error('Falha no servidor');
+            }
+        } catch (err) {
+            alert('Ops! O jogo parece estar offline. Avise o Andre! 😅');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>✨ Enviar para o Jogo</span>';
+        }
+    };
 </script>
 
 </body>

@@ -486,6 +486,9 @@
     border-radius: 8px !important;
     font-size: 0.95rem;
     transition: all 0.2s ease;
+    color: #4a3b2a !important; /* Force dark color for visibility */
+    background: white !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
 }
 
 .trivia-option-btn:hover:not(:disabled) {

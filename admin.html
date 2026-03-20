@@ -58,6 +58,18 @@
             <input type="file" id="importInput" accept=".json" style="display:none">
         </div>
 
+        <!-- Family Invite -->
+        <div class="adm-io-bar" style="flex-direction: column; align-items: stretch; border: 1px dashed var(--accent-gold); background: rgba(201, 165, 90, 0.05); margin-top: 15px;">
+            <span class="adm-io-label" style="margin-bottom: 8px; color: var(--accent-gold);">🚀 Invite Your Family</span>
+            <div style="display:flex; gap:5px; margin-bottom: 8px;">
+                <input type="text" id="inviteLinkInput" readonly style="flex:1; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:var(--text); font-family:monospace; font-size: 0.7rem; padding: 5px; border-radius: 4px;">
+                <button class="btn btn-primary btn-sm" onclick="copyInviteLink()" style="padding: 5px 10px; font-size: 0.7rem; width:auto; justify-content:center;">📋 Copy</button>
+            </div>
+            <div style="font-size: 0.65rem; color: var(--text-muted); text-align: center; line-height: 1.2;">
+                Send this link to family! They can upload photos & messages directly.
+            </div>
+        </div>
+
         <!-- Bulk Scraper -->
         <div class="adm-io-bar" style="flex-direction: column; align-items: stretch;">
             <span class="adm-io-label" style="margin-bottom: 8px;">🤖 Bulk Scraper Queue</span>
@@ -261,11 +273,34 @@ let editingId  = null;   // null = new
 let currentAvatar = null; // base64 or null
 
 // ═══════════════════════════════════════════════════════════════════════
-//  LOAD / SAVE
+//  BOOTSTRAP
 // ═══════════════════════════════════════════════════════════════════════
+window.onload = () => {
+    loadChars();
+    updateInviteLink();
+};
+
+function updateInviteLink() {
+    const input = document.getElementById('inviteLinkInput');
+    if (input) {
+        input.value = window.location.origin + '/family-form.html';
+    }
+}
+
+async function copyInviteLink() {
+    const input = document.getElementById('inviteLinkInput');
+    try {
+        await navigator.clipboard.writeText(input.value);
+        toast('🚀 Invite link copied! Send it to the family group.');
+    } catch (err) {
+        input.select();
+        toast('❌ Failed to copy. Please manually copy.');
+    }
+}
+
 async function loadChars() {
     try {
-        const response = await fetch('data/roster.json');
+        const response = await fetch('http://localhost:3000/api/roster');
         if (response.ok) {
             characters = await response.json();
         } else {
@@ -280,15 +315,19 @@ async function loadChars() {
 
 async function saveChars() {
     try {
-        const response = await fetch('/api/roster', {
+        const response = await fetch('http://localhost:3000/api/roster', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(characters)
         });
-        if (!response.ok) throw new Error('Failed to save to backend');
+        if (!response.ok) throw new Error('API Error: ' + response.statusText);
+        return true;
     } catch (e) {
-        toast('⚠️ Saved visually, but Authoring Server is not running! Run "node server.js" to persist.');
-        console.error(e);
+        toast('⚠️ Server Disconnected! Are you running "node server.js"? Saving locally until server returns.');
+        console.error('Save failed:', e);
+        // Persist locally as fallback so they don't lose work
+        localStorage.setItem(CHAR_KEY, JSON.stringify(characters));
+        return false;
     }
 }
 
@@ -417,7 +456,7 @@ function cancelEdit() {
 // ═══════════════════════════════════════════════════════════════════════
 //  SAVE CHARACTER
 // ═══════════════════════════════════════════════════════════════════════
-function saveChar() {
+async function saveChar() {
     const name = document.getElementById('fName').value.trim();
     if (!name) { toast('⚠️ Please enter a name.'); return; }
 
@@ -447,16 +486,34 @@ function saveChar() {
             : new Date().toISOString(),
     };
 
-    if (editingId) {
+    const isNew = !editingId;
+    if (!isNew) {
         const idx = characters.findIndex(c => c.id === editingId);
         if (idx >= 0) characters[idx] = char;
     } else {
         characters.push(char);
     }
 
-    saveChars();
-    toast(`✅ ${name} saved!`);
-    cancelEdit();
+    const success = await saveChars();
+    if (success) {
+        toast(`✅ ${name} saved to game roster!`);
+        cancelEdit();
+    }
+}
+
+async function deleteChar() {
+    if (!editingId) return;
+    const char = characters.find(c => c.id === editingId);
+    if (!char) return;
+    
+    if (confirm(`Are you sure you want to remove ${char.name}?`)) {
+        characters = characters.filter(c => c.id !== editingId);
+        const success = await saveChars();
+        if (success) {
+            toast(`🗑️ ${char.name} was deleted.`);
+            cancelEdit();
+        }
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -722,7 +779,7 @@ async function exportScraperQueue() {
     toast('🤖 Sending to Scraper Agent... Check your terminal!');
     
     try {
-        const response = await fetch('/api/scrape', {
+        const response = await fetch('http://localhost:3000/api/scrape', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(queue)
@@ -777,7 +834,8 @@ function esc(str) {
 //  EVENT BINDINGS
 // ═══════════════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
-    loadChars(); // Now perfectly triggers renderList()
+    // Shared bootstrap
+    updateInviteLink();
     renderModeBtns();
 
     // Add buttons
@@ -787,7 +845,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Save / Cancel / Delete
     document.getElementById('saveCharBtn').onclick   = saveChar;
     document.getElementById('cancelBtn').onclick     = cancelEdit;
-    document.getElementById('deleteCharBtn').onclick = () => editingId && deleteChar({stopPropagation:()=>{}}, editingId);
+    document.getElementById('deleteCharBtn').onclick = deleteChar;
 
     // Avatar drop area
     const drop  = document.getElementById('avatarDrop');
