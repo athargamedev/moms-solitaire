@@ -9,6 +9,8 @@ let _quizHistory = [];
 let _triviaTimerInterval = null;
 let _triviaTimeLeft = 0;
 let _currentQuizDifficulty = 'easy';
+let _currentQuizCharId = null;
+let _revealedSecrets = JSON.parse(localStorage.getItem('momSolitaire_secrets') || '[]');
 
 // ── QUIZ BANK ─────────────────────────────────────────────────────────────────
 // Merges character quizzes + dedicated quiz bank + auto-generated relationship quizzes
@@ -217,6 +219,7 @@ function openTriviaForHelp(difficulty, isAutoTrigger) {
     }
 
     _currentQuizDifficulty = quiz.difficulty || difficulty;
+    _currentQuizCharId = quiz.charId || null;
     const config = DIFFICULTY_CONFIG[_currentQuizDifficulty] || DIFFICULTY_CONFIG.easy;
     const options = generateOptions(quiz, config.options);
 
@@ -385,10 +388,19 @@ function handleTriviaAnswer(btn, selected, correct) {
 
         if (typeof playSound === 'function') playSound('flip');
 
-        setTimeout(() => {
-            closeTrivia();
-            if (typeof fullRender === 'function') fullRender();
-        }, 2000);
+        // Check for secret message reveal
+        const charWithSecret = _findCharacterSecretMessage(_currentQuizCharId);
+        if (charWithSecret) {
+            setTimeout(() => {
+                closeTrivia();
+                _showSecretMessageReveal(charWithSecret);
+            }, 2000);
+        } else {
+            setTimeout(() => {
+                closeTrivia();
+                if (typeof fullRender === 'function') fullRender();
+            }, 2000);
+        }
     } else {
         btn.style.background = 'var(--danger, #F44336)';
         btn.style.color = '#fff';
@@ -439,6 +451,63 @@ function checkAutoQuizTriggers() {
     } else {
         G._stuckQuizOffered = false;
     }
+}
+
+// ── SECRET MESSAGE REVEAL ─────────────────────────────────────────────────────
+
+/**
+ * Find if a character has an unrevealed secret message.
+ */
+function _findCharacterSecretMessage(charId) {
+    if (!charId) return null;
+    const chars = (typeof getCharacters === 'function') ? getCharacters() : (_characters || []);
+    const char = chars.find(c => c.id === charId);
+    if (!char || !char.secretMessage) return null;
+    // Check if already revealed this session
+    if (_revealedSecrets.includes(charId)) return null;
+    return char;
+}
+
+/**
+ * Show a special overlay revealing a family member's secret message.
+ */
+function _showSecretMessageReveal(char) {
+    // Mark as revealed
+    _revealedSecrets.push(char.id);
+    try { localStorage.setItem('momSolitaire_secrets', JSON.stringify(_revealedSecrets)); } catch(e) {}
+
+    const overlay = document.getElementById('secretMessageOverlay');
+    if (!overlay) {
+        // Fallback if overlay doesn't exist: show as character bubble
+        if (typeof _renderAvatarBubble === 'function') {
+            _renderAvatarBubble(char, char.secretMessage, 8000);
+        }
+        if (typeof fullRender === 'function') fullRender();
+        return;
+    }
+
+    const avatar = document.getElementById('secretAvatar');
+    if (char.avatar) {
+        avatar.style.backgroundImage = `url('${char.avatar}')`;
+        avatar.textContent = '';
+    } else {
+        avatar.style.backgroundImage = 'none';
+        avatar.style.backgroundColor = char.color || '#c9a55a';
+        avatar.textContent = char.name.charAt(0).toUpperCase();
+    }
+
+    document.getElementById('secretName').textContent = `${char.name} (${char.relation || 'Family'})`;
+    document.getElementById('secretText').textContent = char.secretMessage;
+
+    overlay.classList.add('active');
+
+    if (typeof playSound === 'function') playSound('win');
+}
+
+function closeSecretMessage() {
+    const overlay = document.getElementById('secretMessageOverlay');
+    if (overlay) overlay.classList.remove('active');
+    if (typeof fullRender === 'function') fullRender();
 }
 
 /**

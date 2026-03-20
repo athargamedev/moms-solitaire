@@ -103,6 +103,42 @@ app.post('/api/scrape', (req, res) => {
 });
 
 // ----------------------------------------------------
+// FAMILY FORM SUBMISSION
+// ----------------------------------------------------
+
+// [POST] Accept a family member submission from family-form.html
+app.post('/api/family-submit', (req, res) => {
+    try {
+        const character = req.body;
+        if (!character || !character.name) {
+            return res.status(400).json({ error: 'Character data with name is required' });
+        }
+
+        // Load existing roster, append new character, save
+        const existingRoster = JSON.parse(fs.readFileSync(ROSTER_PATH, 'utf8'));
+        
+        // Check for duplicate by name (avoid double submissions)
+        const existing = existingRoster.findIndex(c => 
+            c.name.toLowerCase() === character.name.toLowerCase()
+        );
+        
+        if (existing >= 0) {
+            // Update existing character instead of duplicating
+            existingRoster[existing] = { ...existingRoster[existing], ...character, id: existingRoster[existing].id };
+            console.log(`Updated existing character: ${character.name}`);
+        } else {
+            existingRoster.push(character);
+            console.log(`Added new character: ${character.name}`);
+        }
+        
+        fs.writeFileSync(ROSTER_PATH, JSON.stringify(existingRoster, null, 2));
+        res.json({ success: true, name: character.name });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// ----------------------------------------------------
 // QUIZ BANK API
 // ----------------------------------------------------
 const QUIZ_PATH = path.join(__dirname, 'data', 'quizzes.json');
