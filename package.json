@@ -1,0 +1,26 @@
+{
+  "name": "moms-solitaire",
+  "version": "1.0.0",
+  "description": "A beautiful, fully personalized **Klondike Solitaire** game built as a single local web app — no server, no installation, no internet required. Just open `index.html` in any browser and play!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/athargamedev/moms-solitaire.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/athargamedev/moms-solitaire/issues"
+  },
+  "homepage": "https://github.com/athargamedev/moms-solitaire#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "playwright": "^1.58.2"
+  }
+}

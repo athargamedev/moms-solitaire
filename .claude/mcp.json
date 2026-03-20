@@ -1,0 +1,58 @@
+{
+  "mcpServers": {
+    "unityMCP": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "uvx",
+        "--no-cache",
+        "--refresh",
+        "--from",
+        "D:\\GithubRepos\\unity-mcp-beta\\Server",
+        "mcp-for-unity",
+        "--transport",
+        "stdio"
+      ],
+      "disabled": true
+    },
+    "serena-mcp": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "uvx",
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server",
+        "--project",
+        "D:\\GithubRepos\\moms-solitaire"
+      ],
+      "disabled": true
+    },
+    "sequential-thinking": {
+      "$typeName": "exa.cascade_plugins_pb.CascadePluginCommandTemplate",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "env": {},
+      "disabled": false
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--extension"
+      ],
+      "env": {
+        "PLAYWRIGHT_MCP_EXTENSION_TOKEN": "hH6L0ugJD-qV19joo0aRSFoL0F-aHt87wkhW9cf3eV8"
+      }
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"],
+      "disabled": false
+    }
+  }
+}

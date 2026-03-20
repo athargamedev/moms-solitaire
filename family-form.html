@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mom's Solitaire — Join the Game!</title>
+    <!-- Use the existing game styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Inline styles specifically for this invite form to ensure it looks perfect everywhere -->
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            background-color: var(--bg-felt);
+        }
+        
+        .invite-container {
+            background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+            backdrop-filter: blur(15px);
+            border: 1.5px solid rgba(201,165,90,0.3);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .header-msg {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header-msg h1 {
+            font-family: 'Playfair Display', serif;
+            color: var(--accent-gold);
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .header-msg p {
+            color: var(--text-light);
+            opacity: 0.85;
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--accent-gold-light);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+        }
+
+        .form-control {
+            padding: 14px;
+            border-radius: 12px;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: white;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .file-upload {
+            background: rgba(0,0,0,0.2);
+            padding: 30px;
+            border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: 12px;
+            text-align: center;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload:hover {
+            border-color: var(--accent-gold);
+            background: rgba(201,165,90,0.05);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold));
+            color: #2c1f00;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(201,165,90,0.3);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(201,165,90,0.5);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            color: white;
+            font-size: 1.4rem;
+            margin: 30px 0 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body class="theme-classic">
+
+    <div class="invite-container">
+        <div class="header-msg">
+            <h1>Mom's Solitaire Surprise! 🎁</h1>
+            <p>We are creating a personalized version of Mom's favorite Solitaire game. Fill this out so your face and messages pop up while she plays!</p>
+        </div>
+
+        <!-- NOTE: Replace 'YOUR_FORMSPREE_ID' with your actual endpoint id (e.g. xdoqjzrl), 
+             or change the action to mailto:your-email@example.com -->
+        <form action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST" enctype="multipart/form-data">
+            
+            <div class="section-title">1. Who are you?</div>
+
+            <div class="form-group">
+                <label for="name">Your Name</label>
+                <input type="text" id="name" name="Name" class="form-control" placeholder="e.g. Andre" required>
+            </div>
+
+            <div class="form-group">
+                <label for="relation">Relation to Mom</label>
+                <input type="text" id="relation" name="Relation" class="form-control" placeholder="e.g. Son, Daughter, Sister" required>
+            </div>
+
+            <div class="form-group">
+                <label for="fblink">Your Facebook Profile Link (Optional)</label>
+                <input type="url" id="fblink" name="Facebook_Link" class="form-control" placeholder="e.g. https://facebook.com/your-profile">
+            </div>
+
+            <div class="form-group">
+                <label>Upload a Selfie/Photo (Required)</label>
+                <!-- Formspree supports file uploads on paid plans. If free, ask for an image URL instead -->
+                <input type="file" name="Photo" class="form-control" accept="image/*" required>
+            </div>
+
+            <div class="section-title">2. Messages for Mom</div>
+
+            <div class="form-group">
+                <label for="win_msg">When she WINS the game...</label>
+                <textarea id="win_msg" name="Message_On_Win" class="form-control" placeholder="e.g. Parábens Mom! I knew you could beat it!"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="ace_msg">When she places an ACE...</label>
+                <textarea id="ace_msg" name="Message_On_Ace" class="form-control" placeholder="e.g. Good start! Get those aces up!"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="joke_msg">A random joke or greeting for her...</label>
+                <textarea id="joke_msg" name="Message_Joke" class="form-control" placeholder="e.g. Are you playing instead of cooking dinner? 😂"></textarea>
+            </div>
+
+            <div class="section-title">3. Add a Trivia Quiz! 🧠</div>
+
+            <div class="form-group">
+                <label for="quiz_q">Ask Mom a question about yourself (Reward if right!)</label>
+                <input type="text" id="quiz_q" name="Quiz_Question" class="form-control" placeholder="e.g. What year did I graduate college?">
+            </div>
+
+            <div class="form-group">
+                <label for="quiz_a">The correct answer</label>
+                <input type="text" id="quiz_a" name="Quiz_Answer" class="form-control" placeholder="e.g. 2018">
+            </div>
+
+            <button type="submit" class="btn-submit">Submit to the Game! 🚀</button>
+        </form>
+    </div>
+
+</body>
+</html>

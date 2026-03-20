@@ -116,9 +116,7 @@ function getJoke(category) {
 function onStockDraw() {
     jokeState.stockDrawsInARow++;
     if (jokeState.stockDrawsInARow >= 3 && jokeState.stockDrawsInARow % 3 === 0) {
-        showJokeBubble(getJoke('stockSpam'));
-    } else {
-        jokeState.stockDrawsInARow = 0;
+        showCharacterBubble('stockSpam', getJoke('stockSpam'));
     }
 }
 
@@ -131,7 +129,7 @@ function onFoundationPlace(foundationIdx) {
 
     // First ace ever
     if (totalInFoundations === 1) {
-        showJokeBubble(getJoke('firstAce'), 3500);
+        showCharacterBubble('firstAce', getJoke('firstAce'), 3500);
         jokeState.acesFound++;
         return;
     }
@@ -139,14 +137,14 @@ function onFoundationPlace(foundationIdx) {
     // Suit complete (13 cards on one foundation)
     if (G.foundations[foundationIdx].length === 13) {
         jokeState.suitsComplete++;
-        showJokeBubble(getJoke('suitComplete'), 4000);
+        showCharacterBubble('suitComplete', getJoke('suitComplete'), 4000);
         spawnMiniConfetti();
         return;
     }
 
     // Random foundation praise (1 in 3 chance)
     if (Math.random() < 0.33) {
-        showJokeBubble(getJoke('foundation'));
+        showCharacterBubble('foundation', getJoke('foundation'));
     }
 }
 
@@ -155,25 +153,25 @@ function onCardFlip() {
     const now = Date.now();
     if (now - jokeState.lastFlipJoke > 8000 && Math.random() < 0.20) {
         jokeState.lastFlipJoke = now;
-        showJokeBubble(getJoke('flip'), 1800);
+        showCharacterBubble('flip', getJoke('flip'), 1800);
     }
 }
 
 function onKingMove() {
-    if (Math.random() < 0.6) showJokeBubble(getJoke('kingMove'), 2500);
+    if (Math.random() < 0.6) showCharacterBubble('kingMove', getJoke('kingMove'), 2500);
 }
 
 function onUndo() {
-    showJokeBubble(getJoke('undo'), 2000);
+    showCharacterBubble('undo', getJoke('undo'), 2000);
 }
 
 function onMilestone(moves) {
     if (moves === 25 && !jokeState.milestonesShown.has(25)) {
         jokeState.milestonesShown.add(25);
-        showJokeBubble(getJoke('milestone25'), 3000);
+        showCharacterBubble('milestone25', getJoke('milestone25'), 3000);
     } else if (moves === 50 && !jokeState.milestonesShown.has(50)) {
         jokeState.milestonesShown.add(50);
-        showJokeBubble(getJoke('milestone50'), 3000);
+        showCharacterBubble('milestone50', getJoke('milestone50'), 3000);
     }
 }
 
@@ -181,7 +179,7 @@ function onLongGame(minutes) {
     const key = `long-${minutes}`;
     if (!jokeState.milestonesShown.has(key)) {
         jokeState.milestonesShown.add(key);
-        showJokeBubble(getJoke('longGame'), 4000);
+        showCharacterBubble('longGame', getJoke('longGame'), 4000);
     }
 }
 

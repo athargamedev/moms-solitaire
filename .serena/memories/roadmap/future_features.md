@@ -1,0 +1,5 @@
+## Product Expansion Roadmap
+The user plans to turn Mom's Solitaire into a commercial/scalable product for other families ("Solitaire with the Family"). Three major new features are planned:
+1. **Facebook Scraping Skill**: An agent/script that can take a list of FB profiles, scrape basic info and 3 photos per person, and auto-populate the character list.
+2. **In-Game Quizzes**: Family members pop up during gameplay (e.g., when the player is stuck) and ask multiple-choice trivia questions (e.g., 'How old is brother Raimundo?'). Correct answers grant rewards like an 'undo' token or a 'magic wand' to solve a card.
+3. **Family Contribution Portal**: Move from `localStorage` to a cloud backend (like Supabase/Firebase) where a shareable link can be sent to family members. They can self-serve: upload their own photos, enter their relation, write custom greetings, and add quiz questions. The final game loads this JSON payload from the cloud via a unique Game ID.

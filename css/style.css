@@ -268,7 +268,7 @@ body {
     .header { padding: 10px 14px; }
 }
 
-/* ── JOKE BUBBLE ─────────────────────────── */
+/* ── JOKE BUBBLE (plain text mode) ────────── */
 #joke-bubble {
     position: fixed;
     bottom: 75px;
@@ -284,7 +284,7 @@ body {
     border: 1.5px solid rgba(201,165,90,0.5);
     box-shadow: 0 8px 32px rgba(0,0,0,0.5);
     z-index: 8000;
-    max-width: 420px;
+    max-width: 460px;
     text-align: center;
     line-height: 1.5;
     opacity: 0;
@@ -300,6 +300,76 @@ body {
 #joke-bubble.hide {
     opacity: 0;
     transform: translateX(-50%) translateY(10px);
+}
+
+/* ── CHARACTER AVATAR BUBBLE ─────────────── */
+#joke-bubble.char-bubble {
+    border-radius: 20px;
+    padding: 0;
+    text-align: left;
+    max-width: 380px;
+    border: 1.5px solid rgba(201,165,90,0.35);
+}
+
+.char-bubble-inner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 20px 12px 14px;
+    border-left: 4px solid var(--char-color, #c9a55a);
+    border-radius: inherit;
+}
+
+.char-bubble-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2.5px solid rgba(255,255,255,0.25);
+    flex-shrink: 0;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+}
+
+.char-bubble-initial {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    border: 2.5px solid rgba(255,255,255,0.25);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+}
+
+.char-bubble-text { flex: 1; min-width: 0; }
+
+.char-bubble-name {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--char-color, #c9a55a);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.char-bubble-relation {
+    opacity: 0.75;
+    font-weight: 500;
+}
+
+.char-bubble-msg {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.97rem;
+    color: #f5e8c0;
+    line-height: 1.4;
 }
 
 /* ── PROGRESS BAR ────────────────────────── */

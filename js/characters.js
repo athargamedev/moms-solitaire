@@ -76,17 +76,28 @@ let _rrIndex     = 0;   // round-robin pointer
 let _bubbleTimer = null;
 
 // ── LOAD / SAVE ───────────────────────────────────────────────────────────────
-function loadCharacters() {
+let _isLoading = false;
+
+async function loadCharacters() {
+    if (_isLoading) return;
+    _isLoading = true;
     try {
-        const raw = localStorage.getItem(CHAR_KEY);
-        _characters = raw ? JSON.parse(raw) : [];
-    } catch(e) { _characters = []; }
+        // Fetch static json file. Works natively in browser or on local dev server!
+        const response = await fetch('data/roster.json');
+        if (response.ok) {
+            _characters = await response.json();
+        } else {
+            _characters = [];
+        }
+    } catch(e) { 
+        console.warn('Failed to load roster.json. If running locally without a server, use Live Server or node server.js');
+        _characters = []; 
+    }
+    _isLoading = false;
 }
 
-function saveCharacters(list) {
-    _characters = list;
-    try { localStorage.setItem(CHAR_KEY, JSON.stringify(list)); } catch(e) {}
-}
+// Call on boot
+loadCharacters();
 
 function getCharacterMode() {
     return localStorage.getItem(CHAR_MODE) || 'random';
@@ -153,7 +164,7 @@ function getCharacterMessage(char, event) {
  * @param {number} [duration] – ms to show bubble
  */
 function showCharacterBubble(event, fallback = null, duration = 2800) {
-    loadCharacters();
+    // Relying on the initial async boot load!
     const char = getActiveCharacter(event);
 
     if (!char) {

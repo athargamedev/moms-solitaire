@@ -517,7 +517,7 @@ body {
     border: 2px solid rgba(255,255,255,0.2);
 }
 
-.adm-bubble-preview-text {}
+.adm-bubble-preview-text { flex: 1; min-width: 0; }
 
 .adm-bubble-preview-name {
     font-size: 0.75rem;
