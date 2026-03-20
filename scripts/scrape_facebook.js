@@ -22,16 +22,36 @@ const downloadImage = (url, filepath) => {
 
 (async () => {
     const queuePath = path.join(__dirname, 'scrape_queue.json');
+    const profilesListPath = path.join(__dirname, '..', 'fb-profiles-list.txt');
     const outputPath = path.join(__dirname, 'scraped_roster.json');
 
-    if (!fs.existsSync(queuePath)) {
-        console.error('Could not find scrape_queue.json. Please export it from the Admin Panel first!');
-        process.exit(1);
+    let queueData = [];
+
+    // Try scrape_queue.json first (from admin panel), fall back to fb-profiles-list.txt
+    if (fs.existsSync(queuePath)) {
+        queueData = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
+    } else if (fs.existsSync(profilesListPath)) {
+        console.log('No scrape_queue.json found. Reading from fb-profiles-list.txt...');
+        const lines = fs.readFileSync(profilesListPath, 'utf8').split('\n').filter(l => l.trim());
+        lines.forEach(line => {
+            const urlMatch = line.match(/(https?:\/\/[^\s]+)/);
+            if (urlMatch) {
+                const url = urlMatch[1];
+                const rest = line.replace(url, '').split('-').map(p => p.trim()).filter(Boolean);
+                let name = 'Family', relation = 'Member';
+                if (rest.length >= 2) { name = rest[0]; relation = rest[1]; }
+                else if (rest.length === 1) { name = rest[0]; relation = rest[0]; }
+                else { name = url.split('/').filter(Boolean).pop() || 'User'; }
+                queueData.push({ name, relation, fbUrl: url });
+            }
+        });
+        console.log(`Parsed ${queueData.length} profiles from fb-profiles-list.txt`);
     }
 
-    const queueData = JSON.parse(fs.readFileSync(queuePath, 'utf8'));
     if (!Array.isArray(queueData) || queueData.length === 0) {
-        console.error('scrape_queue.json is empty or invalid.');
+        console.error('No profiles to scrape. Either:');
+        console.error('  1. Use the Admin Panel bulk scraper, or');
+        console.error('  2. Add profiles to fb-profiles-list.txt in format: Name - Relation - https://facebook.com/...');
         process.exit(1);
     }
 

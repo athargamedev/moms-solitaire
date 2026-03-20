@@ -372,6 +372,22 @@
     </div>
 </div>
 
+<!-- ═══════════════════════════════════ SECRET MESSAGE OVERLAY ═══ -->
+<div class="modal-overlay" id="secretMessageOverlay">
+    <div class="modal secret-modal" style="max-width:400px;">
+        <div class="modal-header" style="background:linear-gradient(90deg,#c9a55a,#f9d97a,#c9a55a);">
+            <h2 class="modal-title" style="color:#3d2010;">🎁 Secret Message Unlocked!</h2>
+            <button class="btn btn-ghost btn-icon" style="font-size:1.5rem;color:#3d2010;" onclick="closeSecretMessage()">×</button>
+        </div>
+        <div class="modal-body" style="text-align:center;padding:24px;">
+            <div id="secretAvatar" style="width:90px;height:90px;border-radius:50%;background:#ccc;margin:0 auto 14px;background-size:cover;background-position:center;border:4px solid #c9a55a;display:flex;align-items:center;justify-content:center;color:#fff;font-size:2.2rem;font-weight:bold;"></div>
+            <div id="secretName" style="font-weight:600;font-size:1.1rem;margin-bottom:12px;color:var(--accent-gold);"></div>
+            <div id="secretText" style="font-size:1.1rem;line-height:1.6;color:var(--text-dark);background:rgba(201,165,90,0.08);border:1px solid rgba(201,165,90,0.2);border-radius:12px;padding:20px;font-style:italic;"></div>
+            <button class="btn btn-primary" style="margin-top:20px;" onclick="closeSecretMessage()">Thank you!</button>
+        </div>
+    </div>
+</div>
+
 <!-- Peek overlay (appears when peeking at face-down card) -->
 <div class="peek-overlay" id="peekOverlay" style="display:none;">
     <div class="peek-card" id="peekCard"></div>
