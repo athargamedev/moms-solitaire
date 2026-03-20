@@ -182,10 +182,10 @@ function setupEvents() {
         showToast(CZ.soundEnabled ? 'Sound on 🔊' : 'Sound off 🔇');
     });
 
-    // New: Play Next Move
+    // New: Family Trivia Bonus
     document.getElementById('nextMoveBtn').addEventListener('click', () => {
         startTimer();
-        playNextMove();
+        openTriviaForHelp();
         onMilestone(G.moves);
     });
 

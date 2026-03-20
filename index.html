@@ -23,6 +23,31 @@
     </div>
 
     <div class="header-center">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mom's Solitaire ♥</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/cards.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body class="theme-classic">
+
+<!-- ══════════════════════════════════════════════════════ HEADER ═══ -->
+<header class="header">
+    <div class="header-left">
+        <button class="btn btn-ghost btn-icon" id="soundToggle" title="Toggle Sound">🔊</button>
+        <button class="btn btn-primary" id="customizeBtn">✨ Customize</button>
+        <a href="admin.html" class="btn btn-ghost btn-icon" title="Manage Family Characters">👨‍👩‍👧‍👦</a>
+    </div>
+
+    <div class="header-center">
         <h1 class="header-title">Mom's <span>Solitaire</span></h1>
         <p class="header-subtitle">Klondike · Classic Edition</p>
     </div>
@@ -30,7 +55,7 @@
     <div class="header-right">
         <button class="btn btn-ghost btn-icon" id="undoBtn"    title="Undo (Ctrl+Z)">↩️</button>
         <button class="btn btn-ghost btn-icon" id="hintBtn"    title="Hint (H)">💡</button>
-        <button class="btn btn-ghost btn-icon" id="nextMoveBtn" title="Play one move for me">🤖</button>
+        <button class="btn btn-ghost btn-icon" id="nextMoveBtn" title="Family Trivia Helper">🧠</button>
         <button class="btn btn-ghost btn-icon" id="newGameBtn" title="New Game">🔄</button>
     </div>
 </header>
@@ -225,6 +250,25 @@
     </div>
 </div>
 
+<!-- ════════════════════════════════════════════ TRIVIA OVERLAY ═══ -->
+<div class="modal-overlay" id="triviaOverlay">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <div class="modal-header">
+            <h2 class="modal-title">🧠 Family Trivia!</h2>
+            <button class="btn btn-ghost btn-icon" style="font-size:1.5rem" onclick="closeTrivia()">×</button>
+        </div>
+        <div class="modal-body" style="padding-top:10px;">
+            <div id="triviaAvatar" style="width:80px;height:80px;border-radius:50%;background:#ccc;margin:0 auto 15px;background-size:cover;background-position:center;border:3px solid var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:2rem;font-weight:bold;"></div>
+            <div style="font-weight:600;font-size:1.1rem;margin-bottom:8px" id="triviaName">Name</div>
+            <p id="triviaQuestion" style="margin-bottom:20px;font-size:1.05rem;line-height:1.4;">Question?</p>
+            <div id="triviaOptions" style="display:flex;flex-direction:column;gap:10px;">
+                <!-- generated options -->
+            </div>
+            <div id="triviaFeedback" style="margin-top:15px;font-weight:600;min-height:24px;"></div>
+        </div>
+    </div>
+</div>
+
 <!-- ════════════════════════════════════════════ VICTORY OVERLAY ═══ -->
 <div class="victory-overlay" id="victoryOverlay">
     <div class="victory-content">
@@ -248,6 +292,7 @@
 <script src="js/jokes.js"></script>
 <script src="js/characters.js"></script>
 <script src="js/autoplay.js"></script>
+<script src="js/quizzes.js"></script>
 <script src="js/render.js"></script>
 <script src="js/drag.js"></script>
 <script src="js/main.js"></script>
